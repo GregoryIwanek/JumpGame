@@ -16,7 +16,6 @@ public abstract class GameObject implements Comparable<GameObject>
     protected int mWidth;
     protected int mHeight;
 
-    //
     @Override
     public int compareTo(GameObject compared) {
 
