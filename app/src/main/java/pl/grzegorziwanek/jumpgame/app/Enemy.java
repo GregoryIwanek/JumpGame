@@ -3,12 +3,10 @@ package pl.grzegorziwanek.jumpgame.app;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 
-import java.util.Random;
-
 /**
  * Created by Grzegorz Iwanek on 26.08.2016.
  */
-public class Enemy extends GameObject
+public class Enemy extends GameObject implements GameObjectService
 {
     private int mSpeed;
     private MyAnimation mAnimation = new MyAnimation();
@@ -36,12 +34,14 @@ public class Enemy extends GameObject
         mAnimation.setDelay(100-mSpeed);
     }
 
+    @Override
     public void update()
     {
         mX -= mSpeed;
         mAnimation.update();
     }
 
+    @Override
     public void draw(Canvas canvas)
     {
         try

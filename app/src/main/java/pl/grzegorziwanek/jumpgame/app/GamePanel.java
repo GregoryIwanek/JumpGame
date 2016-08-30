@@ -4,13 +4,14 @@ import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
+import android.graphics.Rect;
 import android.view.MotionEvent;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 
-import org.w3c.dom.Text;
-
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.Random;
 
 /**
@@ -23,11 +24,11 @@ public class GamePanel extends SurfaceView implements SurfaceHolder.Callback
     private Bitmap mScaledBackgroundSource;
     private Player mPlayer;
 
-    private ArrayList<Enemy> mEnemy;
+    //container list for all game objects
+    private ArrayList<GameObjectContainer> mGameObjects;
     private static long sEnemyStartTime;
-
-    private ArrayList<Bonus> mBonus;
     private static long sBonusStartTime;
+    private static boolean sObjectAdded;
 
     private static Random sRand = new Random();
 
@@ -61,11 +62,10 @@ public class GamePanel extends SurfaceView implements SurfaceHolder.Callback
         mBackground = new Background(mScaledBackgroundSource);
         mPlayer = new Player(BitmapFactory.decodeResource(getResources(), R.drawable.mouse_walk), 75, 75, 12);
 
-        mEnemy = new ArrayList<Enemy>();
+        mGameObjects = new ArrayList<>();
         sEnemyStartTime = System.nanoTime();
-
-        mBonus = new ArrayList<Bonus>();
         sBonusStartTime = System.nanoTime();
+        sObjectAdded = false;
     }
 
     @Override
@@ -80,7 +80,7 @@ public class GamePanel extends SurfaceView implements SurfaceHolder.Callback
         boolean retry = true;
         int counter = 0;
 
-        while (retry == true && counter < 1000)
+        while (retry && counter < 1000)
         {
             counter++;
             try
@@ -137,7 +137,60 @@ public class GamePanel extends SurfaceView implements SurfaceHolder.Callback
 
             updateEnemy();
             updateBonus();
+            updateObjects();
         }
+    }
+
+    public void updateObjects()
+    {
+        //update all objects except player object and background object; sort list according to Y position
+        //(sorting, because we want to draw objects in right order); sort ONLY if there is new object on a sorted list
+        if (sObjectAdded)
+        {
+            sortList();
+            sObjectAdded = false;
+        }
+
+        updatePosition();
+
+        checkCollision();
+    }
+
+    private void sortList()
+    {
+        Collections.sort( mGameObjects, new Comparator<GameObjectContainer>() {
+            public int compare (GameObjectContainer object1, GameObjectContainer object2) {
+                return object1.comparePosition() - object2.comparePosition();
+            }
+        });
+    }
+
+    public void updatePosition()
+    {
+        for (int i=0; i<mGameObjects.size(); i++)
+        {
+            mGameObjects.get(i).update();
+            if (mGameObjects.get(i).getX() < -200)
+            {
+                mGameObjects.remove(i);
+            }
+        }
+    }
+
+    public void checkCollision()
+    {
+        for (int i=0; i<mGameObjects.size(); i++)
+        {
+            if(collision(mGameObjects.get(i), mPlayer))
+            {
+                mGameObjects.remove(i);
+                mPlayer.setPlaying(false);
+                break;
+            }
+        }
+    }
+    public boolean collision(GameObjectContainer object1, GameObject object2) {
+        return Rect.intersects(object1.getRectangle(), object2.getRectangle());
     }
 
     public void updateEnemy()
@@ -156,15 +209,7 @@ public class GamePanel extends SurfaceView implements SurfaceHolder.Callback
         if(enemyElapsed > spawnDelay)
         {
             spawnEnemy();
-        }
-
-        for (int i=0; i<mEnemy.size(); i++)
-        {
-            mEnemy.get(i).update();
-            if(mEnemy.get(i).getX() < -100)
-            {
-                mEnemy.remove(i);
-            }
+            sObjectAdded = true;
         }
     }
 
@@ -198,7 +243,7 @@ public class GamePanel extends SurfaceView implements SurfaceHolder.Callback
         }
 
         //add object to list
-        mEnemy.add(new Enemy(image, sScreenWidth+30, yRand, 200, 100, speed, numFrames, "enemy"));
+        mGameObjects.add(new GameObjectContainer(new Enemy(image, sScreenWidth+30, yRand, 200, 100, speed, numFrames, "enemy")));
 
         //reset timer
         sEnemyStartTime = System.nanoTime();
@@ -220,33 +265,47 @@ public class GamePanel extends SurfaceView implements SurfaceHolder.Callback
         if(bonusElapsed > spawnDelay)
         {
             spawnBonus();
-        }
-
-        //update position and remove if needed
-        for (int i=0; i<mBonus.size(); i++)
-        {
-            mBonus.get(i).update();
-            if(mBonus.get(i).getX() < -100)
-            {
-                mBonus.remove(i);
-            }
+            sObjectAdded = true;
         }
     }
 
     public void spawnBonus()
     {
-        //set random position on Y axis
-        int yRand = (int) (sRand.nextDouble() * sScreenHeight - 50);
+        //set random bonus (cheese, trap etc) and random position
+        Bitmap image;
+        int yRand;
+
+        int type = sRand.nextInt(2);
+        switch (type)
+        {
+            case 0:
+                image = BitmapFactory.decodeResource(getResources(), R.drawable.cheese);
+                yRand = (int) (sRand.nextDouble() * sScreenHeight - image.getHeight());
+                break;
+            case 1:
+                //set image to show
+                image = BitmapFactory.decodeResource(getResources(), R.drawable.mouse_trap);
+                yRand = (int) (sRand.nextDouble() * sScreenHeight - image.getHeight());
+                break;
+            default:
+                //set image to show
+                image = BitmapFactory.decodeResource(getResources(), R.drawable.cheese);
+                yRand = (int) (sRand.nextDouble() * sScreenHeight - image.getHeight());
+                break;
+        }
+
+        //make sure, object is on screen
         if(yRand < 0)
         {
             yRand = 0;
         }
 
-        //set image to show
-        Bitmap image = BitmapFactory.decodeResource(getResources(), R.drawable.cheese);
+        //set size of object depending on size of image
+        int height = image.getHeight();
+        int width = image.getWidth();
 
         //add object to container list
-        mBonus.add(new Bonus(image, sScreenWidth+30, yRand, 65, 50, MOVESPEED));
+        mGameObjects.add(new GameObjectContainer(new Bonus(image, sScreenWidth+30, yRand, width, height, MOVESPEED)));
 
         //reset timer
         sBonusStartTime = System.nanoTime();
@@ -259,14 +318,9 @@ public class GamePanel extends SurfaceView implements SurfaceHolder.Callback
         mBackground.draw(canvas);
         mPlayer.draw(canvas);
 
-        for (Enemy enemy : mEnemy)
+        for (GameObjectContainer gameObjectContainer : mGameObjects)
         {
-            enemy.draw(canvas);
-        }
-
-        for (Bonus bonus : mBonus)
-        {
-            bonus.draw(canvas);
+            gameObjectContainer.draw(canvas);
         }
     }
 

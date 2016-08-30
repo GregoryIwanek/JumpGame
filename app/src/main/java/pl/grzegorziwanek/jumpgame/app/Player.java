@@ -8,7 +8,7 @@ import android.graphics.Canvas;
  * Contains class responsible for Player object. Contains and calculate correct animation of a player, information etc.
  * Player goes only up and down on a screen ( along Y axis).
  */
-public class Player extends GameObject
+public class Player extends GameObject implements GameObjectService
 {
     private Bitmap mFramesheet; //bitmap with frame pictures
     private MyAnimation mMyAnimation;
@@ -62,6 +62,7 @@ public class Player extends GameObject
         mMyAnimation.setDelay(10);
     }
 
+    @Override
     public void update()
     {
         //methods for updating state of player object
@@ -120,6 +121,7 @@ public class Player extends GameObject
         }
     }
 
+    @Override
     public void draw(Canvas canvas)
     {
         //draw current player object on a screen

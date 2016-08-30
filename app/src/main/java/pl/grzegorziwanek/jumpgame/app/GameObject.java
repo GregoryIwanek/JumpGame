@@ -4,14 +4,31 @@ import android.graphics.Rect;
 
 /**
  * Created by Grzegorz Iwanek on 25.08.2016.
+ * Contains top level class of game objects in a game;
+ * Class implements Comparable ( for sake positioning elements on the list depending by Y value->
+ * they need to be drawn in correct order, objects with bigger Y value: in foreground, objects closer to 0 axis: in background);
  */
-public abstract class GameObject
+public abstract class GameObject implements Comparable<GameObject>
 {
     protected int mX;
     protected int mY;
     protected int mDy;
     protected int mWidth;
     protected int mHeight;
+
+    @Override
+    public int compareTo(GameObject compared) {
+
+        if (comparePosition() > compared.comparePosition()) {
+            return 1;
+        }
+        else if (comparePosition() < compared.comparePosition()) {
+            return -1;
+        }
+        else {
+            return 0;
+        }
+    }
 
     //setters
     public void setX(int x)
@@ -44,9 +61,14 @@ public abstract class GameObject
         return mHeight;
     }
 
+    public int comparePosition()
+    {
+        return (mY + mHeight);
+    }
+
     //get for checking collision
     public Rect getRectangle()
     {
-        return new Rect(mX, mY, mX+mWidth, mY+mHeight);
+        return new Rect((int)(1.1*mX), (int)(1.1*mY), (int)(0.9*(mX+mWidth)), (int)(0.9*(mY+mHeight)));
     }
 }
