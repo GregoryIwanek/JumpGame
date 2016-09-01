@@ -2,6 +2,7 @@ package pl.grzegorziwanek.jumpgame.app;
 
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
+import android.graphics.Rect;
 
 /**
  * Created by Grzegorz Iwanek on 27.08.2016.
@@ -30,8 +31,14 @@ public class Bonus extends GameObject implements GameObjectService
     }
 
     @Override
-    public void draw(Canvas canvas)
-    {
-        canvas.drawBitmap(mImage, mX, mY, null);
+    public void draw(Canvas canvas) {
+        try
+        {
+            canvas.drawBitmap(mImage, mX, mY, null);
+        }
+        catch (Exception e)
+        {
+            System.out.println("Bonus, drawing exception!");
+        }
     }
 }

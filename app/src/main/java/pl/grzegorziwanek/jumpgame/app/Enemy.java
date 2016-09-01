@@ -50,7 +50,7 @@ public class Enemy extends GameObject implements GameObjectService
         }
         catch (Exception e)
         {
-            System.out.println("Enemy, drawing exception");
+            System.out.println("Enemy, drawing exception!");
         }
     }
 

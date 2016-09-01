@@ -69,6 +69,6 @@ public abstract class GameObject implements Comparable<GameObject>
     //get for checking collision
     public Rect getRectangle()
     {
-        return new Rect((int)(1.1*mX), (int)(1.1*mY), (int)(0.9*(mX+mWidth)), (int)(0.9*(mY+mHeight)));
+        return new Rect((int)(mX + 0.1*mWidth), (int)(mY + 0.1*mHeight), (int)(mX + 0.9*mWidth), (int)(mY + 0.9*mHeight));
     }
 }

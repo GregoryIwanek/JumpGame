@@ -2,6 +2,7 @@ package pl.grzegorziwanek.jumpgame.app;
 
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
+import android.graphics.Rect;
 
 /**
  * Created by Grzegorz Iwanek on 25.08.2016.
@@ -125,7 +126,14 @@ public class Player extends GameObject implements GameObjectService
     public void draw(Canvas canvas)
     {
         //draw current player object on a screen
-        canvas.drawBitmap(mMyAnimation.getImage(), mX, mY, null);
+        try
+        {
+            canvas.drawBitmap(mMyAnimation.getImage(), mX, mY, null);
+        }
+        catch (Exception e)
+        {
+            System.out.println("Player, drawing exception!");
+        }
     }
     public void setGoingUp(boolean goingUp)
     {
@@ -143,6 +151,12 @@ public class Player extends GameObject implements GameObjectService
     {
         //reset speed of player
         mDy = 0;
+    }
+
+    @Override
+    public Rect getRectangle()
+    {
+        return new Rect((int)(mX + 0.4*mWidth), (int)(mY + 0.1*mHeight), (int)(mX + 0.9*mWidth), (int)(mY + 0.9*mHeight));
     }
 
     public void resetScore()

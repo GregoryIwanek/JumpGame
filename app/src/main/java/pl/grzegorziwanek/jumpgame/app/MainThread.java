@@ -81,7 +81,7 @@ public class MainThread extends Thread
         }
         catch (Exception e)
         {
-            System.out.println("Exception: update and draw");
+            System.out.println("Exception main thread: update and draw");
         }
         finally
         {

@@ -4,6 +4,8 @@ import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
+import android.graphics.Color;
+import android.graphics.Paint;
 import android.graphics.Rect;
 import android.view.MotionEvent;
 import android.view.SurfaceHolder;
@@ -35,6 +37,8 @@ public class GamePanel extends SurfaceView implements SurfaceHolder.Callback
     public static final int MOVESPEED = -5; //movement speed of background image
     public static int sScreenWidth;
     public static int sScreenHeight;
+
+    private static final Paint squareColor = new Paint(Color.CYAN);
 
     public GamePanel(Context context)
     {
