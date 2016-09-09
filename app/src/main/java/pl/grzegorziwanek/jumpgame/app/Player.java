@@ -112,13 +112,13 @@ public class Player extends GameObject implements GameObjectService
     {
         //update position on Y axis
         mY += mDy*2;
-        if(mY <= 0)
+        if(mY <= GamePanel.SPAWNMARGIN)
         {
-            mY = 0;
+            mY = GamePanel.SPAWNMARGIN;
         }
-        else if (mY >= GamePanel.sScreenHeight-mHeight)
+        else if (mY >= GamePanel.sScreenHeight - mHeight - GamePanel.SPAWNMARGIN)
         {
-            mY = GamePanel.sScreenHeight-mHeight;
+            mY = GamePanel.sScreenHeight - mHeight - GamePanel.SPAWNMARGIN;
         }
     }
 

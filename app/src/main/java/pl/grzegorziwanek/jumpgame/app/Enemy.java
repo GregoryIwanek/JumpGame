@@ -14,9 +14,9 @@ public class Enemy extends GameObject implements GameObjectService
 
     private String mTypeOfObject = "enemy";
 
-    public Enemy(Bitmap res, int x, int y, int width, int height, int speed, int numFrames, String typeOfObject)
+    public Enemy(Bitmap res, int x, int y, int width, int height, int speed, int numFrames, String type)
     {
-        mTypeOfObject = typeOfObject;
+        mObjectType = type;
         mX = x;
         mY = y;
         mWidth = width;

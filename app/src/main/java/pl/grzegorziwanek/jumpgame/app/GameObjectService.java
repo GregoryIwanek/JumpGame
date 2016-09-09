@@ -13,4 +13,5 @@ public interface GameObjectService
     int getX();
     int comparePosition();
     Rect getRectangle();
+    String getObjectType();
 }

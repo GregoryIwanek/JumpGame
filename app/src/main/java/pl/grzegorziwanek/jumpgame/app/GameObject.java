@@ -15,6 +15,7 @@ public abstract class GameObject implements Comparable<GameObject>
     protected int mDy;
     protected int mWidth;
     protected int mHeight;
+    protected String mObjectType = "";
 
     @Override
     public int compareTo(GameObject compared) {
@@ -70,5 +71,15 @@ public abstract class GameObject implements Comparable<GameObject>
     public Rect getRectangle()
     {
         return new Rect((int)(mX + 0.1*mWidth), (int)(mY + 0.1*mHeight), (int)(mX + 0.9*mWidth), (int)(mY + 0.9*mHeight));
+    }
+
+    public void setObjectType(String type)
+    {
+        mObjectType = type;
+    }
+
+    public String getObjectType()
+    {
+        return mObjectType;
     }
 }

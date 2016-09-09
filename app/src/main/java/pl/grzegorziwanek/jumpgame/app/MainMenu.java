@@ -25,7 +25,7 @@ public class MainMenu extends Activity
 
     public void onClickOptions(View view)
     {
-        Intent intent = new Intent(this, OptionsActivity.class);
+        Intent intent = new Intent(this, UserSettingsActivity.class);
         startActivity(intent);
     }
 

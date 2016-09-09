@@ -1,15 +1,16 @@
 package pl.grzegorziwanek.jumpgame.app;
 
+import android.preference.PreferenceActivity;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
 
-public class OptionsActivity extends AppCompatActivity {
+public class UserSettingsActivity extends PreferenceActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_options);
+        addPreferencesFromResource(R.layout.activity_user_settings);
     }
 
     public void onClickMovement(View view)

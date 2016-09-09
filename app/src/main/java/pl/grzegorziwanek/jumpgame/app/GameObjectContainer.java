@@ -44,4 +44,10 @@ public class GameObjectContainer implements GameObjectService
     {
         return mGameObjectService.getRectangle();
     }
+
+    @Override
+    public String getObjectType()
+    {
+        return mGameObjectService.getObjectType();
+    }
 }

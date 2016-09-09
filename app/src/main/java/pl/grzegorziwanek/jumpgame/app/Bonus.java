@@ -14,7 +14,7 @@ public class Bonus extends GameObject implements GameObjectService
     private int mSpeed;
     private Bitmap mImage;
 
-    public Bonus(Bitmap res, int x, int y, int width, int height, int speed)
+    public Bonus(Bitmap res, int x, int y, int width, int height, int speed, String type)
     {
         mImage = res;
         mX = x;
@@ -22,6 +22,7 @@ public class Bonus extends GameObject implements GameObjectService
         mWidth = width;
         mHeight = height;
         mSpeed = speed;
+        mObjectType = type;
     }
 
     @Override
