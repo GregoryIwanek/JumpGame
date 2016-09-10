@@ -84,6 +84,12 @@ public class Player extends GameObject implements GameObjectService
         }
     }
 
+    //used when player colliding with bonus type object
+    public void addExtraScrore(int extraScore)
+    {
+        mScore += extraScore;
+    }
+
     private void updateAnimation()
     {
         mMyAnimation.update();

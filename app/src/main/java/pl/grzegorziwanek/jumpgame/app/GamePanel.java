@@ -46,7 +46,7 @@ public class GamePanel extends SurfaceView implements SurfaceHolder.Callback
 
     private static final Paint squareColor = new Paint(Color.CYAN);
     private static int sBestScore = 0;
-    private static int sBonusCollected = 0;
+    private static int sBonusCollected = 0; //max 3 ( number of cheese pictures to show in interface)
 
     public GamePanel(Context context)
     {
@@ -97,6 +97,7 @@ public class GamePanel extends SurfaceView implements SurfaceHolder.Callback
                 //block current thread
                 mMainThread.join();
 
+                //set null, so GC will collect it
                 mMainThread = null;
                 retry = false;
             }
@@ -207,18 +208,26 @@ public class GamePanel extends SurfaceView implements SurfaceHolder.Callback
         {
             if(collision(mGameObjects.get(i), mPlayer))
             {
-                if (mGameObjects.get(i).getObjectType() != "BONUS")
+                switch (mGameObjects.get(i).getObjectType())
                 {
-                    System.out.println(mGameObjects.get(i).getObjectType());
-                    mGameObjects.remove(i);
-                    mPlayer.setPlaying(false);
-                    mMainThread = null;
-                    break;
-                }
-                else
-                {
-                    mGameObjects.remove(i);
-                    sBonusCollected++;
+                    case "ENEMY":
+                        mGameObjects.remove(i);
+                        mPlayer.setPlaying(false);
+                        mMainThread = null;
+                        break;
+                    case "BONUS_CHEESE":
+                        mGameObjects.remove(i);
+                        updateBonusValue("BONUS_CHEESE");
+                        mPlayer.addExtraScrore(25);
+                        break;
+                    case "BONUS_TRAP":
+                        mGameObjects.remove(i);
+                        updateBonusValue("BONUS_TRAP");
+                        mPlayer.addExtraScrore(-50);
+                        break;
+                    default:
+                        System.out.println("ERROR OF OBJECT TYPE OCCUR: UNDEFINED TYPE OF OBJECT COLLIDING WITH PLAYER");
+                        break;
                 }
             }
         }
@@ -227,13 +236,35 @@ public class GamePanel extends SurfaceView implements SurfaceHolder.Callback
         return Rect.intersects(object1.getRectangle(), object2.getRectangle());
     }
 
+    private void updateBonusValue(String collidingObject)
+    {
+        if (collidingObject.equals("BONUS_CHEESE"))
+        {
+            if(sBonusCollected <3)
+            {
+                sBonusCollected++;
+            }
+        }
+        else if (collidingObject.equals("BONUS_TRAP"))
+        {
+            sBonusCollected -= 2;
+            //if is below zero, set GAME OVER
+            if (sBonusCollected < 0)
+            {
+                mPlayer.setPlaying(false);
+                mMainThread = null;
+                sBonusCollected = 0;
+            }
+        }
+    }
+
     public void updateEnemy()
     {
         //calculate time passed till now
         long enemyElapsed = (System.nanoTime() - sEnemyStartTime) / 1000000;
 
         //calculate period between spawning enemies ( possible range 1.0 - 2.5 sec); getting shorter;
-        long spawnDelay = 3000 - mPlayer.getScore()/4;
+        long spawnDelay = 4000 - mPlayer.getScore()/3;
         if(spawnDelay < 1500)
         {
             spawnDelay = 1500;
@@ -257,7 +288,7 @@ public class GamePanel extends SurfaceView implements SurfaceHolder.Callback
         }
         //set random speed of enemy, hold it between 40 and MOVESPEED (5) of a background
         int speed = 4 + (int)(sRand.nextDouble()*mPlayer.getScore()/10); //rand.nextDouble() gives 1
-        if (speed < 7)
+        if (speed < 10)
         {
             speed = 5;
         }
@@ -320,6 +351,7 @@ public class GamePanel extends SurfaceView implements SurfaceHolder.Callback
     {
         //set random bonus (cheese, trap etc) and random position
         Bitmap image;
+        String objectType;
         int yRand;
 
         int type = sRand.nextInt(2);
@@ -328,16 +360,19 @@ public class GamePanel extends SurfaceView implements SurfaceHolder.Callback
             case 0:
                 image = BitmapFactory.decodeResource(getResources(), R.drawable.cheese);
                 yRand = (int) (sRand.nextDouble() * sScreenHeight - (SPAWNMARGIN + image.getHeight()));
+                objectType = "BONUS_CHEESE";
                 break;
             case 1:
                 //set image to show
                 image = BitmapFactory.decodeResource(getResources(), R.drawable.mouse_trap);
                 yRand = (int) (sRand.nextDouble() * sScreenHeight - (SPAWNMARGIN + image.getHeight()));
+                objectType = "BONUS_TRAP";
                 break;
             default:
                 //set image to show
                 image = BitmapFactory.decodeResource(getResources(), R.drawable.cheese);
                 yRand = (int) (sRand.nextDouble() * sScreenHeight - (SPAWNMARGIN + image.getHeight()));
+                objectType = "BONUS_CHEESE";
                 break;
         }
 
@@ -352,7 +387,7 @@ public class GamePanel extends SurfaceView implements SurfaceHolder.Callback
         int width = image.getWidth();
 
         //add object to container list
-        mGameObjects.add(new GameObjectContainer(new Bonus(image, sScreenWidth+30, yRand, width, height, MOVESPEED, "BONUS")));
+        mGameObjects.add(new GameObjectContainer(new Bonus(image, sScreenWidth+30, yRand, width, height, MOVESPEED, objectType)));
 
         //reset timer
         sBonusStartTime = System.nanoTime();
@@ -370,8 +405,10 @@ public class GamePanel extends SurfaceView implements SurfaceHolder.Callback
         {
             gameObjectContainer.draw(canvas);
         }
+
         //draw score and results
         drawText(canvas);
+        drawBonusBar(canvas);
     }
 
     public void drawText(Canvas canvas)
@@ -382,8 +419,25 @@ public class GamePanel extends SurfaceView implements SurfaceHolder.Callback
         paint.setTypeface(Typeface.create(Typeface.DEFAULT, Typeface.BOLD));
 
         canvas.drawText("SCORE: " + mPlayer.getScore(), 25, sScreenHeight - 25, paint);
-        canvas.drawText("CHEESE: " + sBonusCollected, 25, 50, paint);
         canvas.drawText("BEST SCORE: " + sBestScore, sScreenWidth - 350, sScreenHeight-25, paint);
+    }
+
+    public void drawBonusBar(Canvas canvas)
+    {
+        for (int i=0; i<3; i++)
+        {
+            Bitmap image;
+            if (i<sBonusCollected)
+            {
+                image = BitmapFactory.decodeResource(getResources(), R.drawable.cheese_50x50);
+            }
+            else
+            {
+                image = BitmapFactory.decodeResource(getResources(), R.drawable.x_sign);
+            }
+
+            canvas.drawBitmap(image, 25+i*60, 10, null);
+        }
     }
 
     private void setVariables()
