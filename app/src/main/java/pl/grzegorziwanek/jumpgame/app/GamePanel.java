@@ -232,7 +232,9 @@ public class GamePanel extends SurfaceView implements SurfaceHolder.Callback
             }
         }
     }
-    public boolean collision(GameObjectContainer object1, GameObject object2) {
+
+    public boolean collision(GameObjectContainer object1, GameObject object2)
+    {
         return Rect.intersects(object1.getRectangle(), object2.getRectangle());
     }
 
@@ -287,7 +289,8 @@ public class GamePanel extends SurfaceView implements SurfaceHolder.Callback
             yRand = SPAWNMARGIN;
         }
         //set random speed of enemy, hold it between 40 and MOVESPEED (5) of a background
-        int speed = 4 + (int)(sRand.nextDouble()*mPlayer.getScore()/10); //rand.nextDouble() gives 1
+        int speed = 4 + (int)(sRand.nextDouble()*mPlayer.getScore()/20); //rand.nextDouble() gives 1
+        System.out.println("speed= " + speed);
         if (speed < 10)
         {
             speed = 5;
@@ -301,17 +304,27 @@ public class GamePanel extends SurfaceView implements SurfaceHolder.Callback
         // of images to show ( fast running cat, walking cat etc;)
         Bitmap image;
         int numFrames;
+        int width = 200;
+        int height = 75;
+
         if (speed == 5)
         {
             //picture - cat sitting in one place
             image = BitmapFactory.decodeResource(getResources(), R.drawable.cat_sitting);
             numFrames = 6;
+            //set new width of picture- sitting cat have smaller width of image
         }
-        else if (speed < 25)
+        else if (speed < 20)
         {
             //picture - cat walking slowly
             image = BitmapFactory.decodeResource(getResources(), R.drawable.cat_normal_speed);
             numFrames = 12;
+        }
+        else if (speed < 30)
+        {
+            //picture - cat running slowly
+            image = BitmapFactory.decodeResource(getResources(), R.drawable.cat_slow_run);
+            numFrames = 16;
         }
         else
         {
@@ -321,7 +334,7 @@ public class GamePanel extends SurfaceView implements SurfaceHolder.Callback
         }
 
         //add object to list
-        mGameObjects.add(new GameObjectContainer(new Enemy(image, sScreenWidth+30, yRand, 200, 100, speed, numFrames, "ENEMY")));
+        mGameObjects.add(new GameObjectContainer(new Enemy(image, sScreenWidth+30, yRand, width, height, speed, numFrames, "ENEMY")));
 
         //reset timer
         sEnemyStartTime = System.nanoTime();
@@ -419,7 +432,7 @@ public class GamePanel extends SurfaceView implements SurfaceHolder.Callback
         paint.setTypeface(Typeface.create(Typeface.DEFAULT, Typeface.BOLD));
 
         canvas.drawText("SCORE: " + mPlayer.getScore(), 25, sScreenHeight - 25, paint);
-        canvas.drawText("BEST SCORE: " + sBestScore, sScreenWidth - 350, sScreenHeight-25, paint);
+        canvas.drawText("BEST SCORE: " + sBestScore, sScreenWidth - 325, sScreenHeight-25, paint);
     }
 
     public void drawBonusBar(Canvas canvas)
