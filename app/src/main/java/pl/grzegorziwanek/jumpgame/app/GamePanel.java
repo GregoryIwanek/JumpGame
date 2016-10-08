@@ -202,6 +202,7 @@ public class GamePanel extends SurfaceView implements SurfaceHolder.Callback
         }
     }
 
+
     public void checkCollision()
     {
         for (int i=0; i<mGameObjects.size(); i++)
