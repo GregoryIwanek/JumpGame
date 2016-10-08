@@ -310,9 +310,8 @@ public class GamePanel extends SurfaceView implements SurfaceHolder.Callback
         if (speed == 5)
         {
             //picture - cat sitting in one place
-            image = BitmapFactory.decodeResource(getResources(), R.drawable.cat_sitting);
-            numFrames = 6;
-            //set new width of picture- sitting cat have smaller width of image
+            image = BitmapFactory.decodeResource(getResources(), R.drawable.cat_sleeping);
+            numFrames = 1;
         }
         else if (speed < 20)
         {
