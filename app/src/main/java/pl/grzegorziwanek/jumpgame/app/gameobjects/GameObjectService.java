@@ -1,13 +1,9 @@
-package pl.grzegorziwanek.jumpgame.app;
+package pl.grzegorziwanek.jumpgame.app.gameobjects;
 
 import android.graphics.Canvas;
 import android.graphics.Rect;
 
-/**
- * Created by Grzegorz Iwanek on 28.08.2016.
- */
-public interface GameObjectService
-{
+public interface GameObjectService {
     void update();
     void draw(Canvas canvas);
     int getX();

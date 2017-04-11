@@ -3,17 +3,14 @@ package pl.grzegorziwanek.jumpgame.app;
 import android.graphics.Canvas;
 import android.view.SurfaceHolder;
 
-import java.util.function.ToDoubleBiFunction;
-
 /**
  * Created by Grzegorz Iwanek on 24.08.2016.
  * Main thread of the game. Inherits from Thread class, and is responsible for updating and drawing current state of the game on canvas.
  * Also, limits possible maximum FPS (Frame Per Second) in game, by putting app to sleep ( in case it would have bigger FPS than defined).
  *
  */
-public class MainThread extends Thread
-{
-    private GamePanel gamePanel;
+public class MainThread extends Thread {
+    private GameDrawingPanel gameDrawingPanel;
     private SurfaceHolder surfaceHolder;
     private boolean running;
 
@@ -29,19 +26,16 @@ public class MainThread extends Thread
     private long averageFPS = 0;
 
 
-    public MainThread(SurfaceHolder surfaceHolder, GamePanel gamePanel)
-    {
+    public MainThread(SurfaceHolder surfaceHolder, GameDrawingPanel gameDrawingPanel) {
         super();
 
-        this.gamePanel = gamePanel;
+        this.gameDrawingPanel = gameDrawingPanel;
         this.surfaceHolder = surfaceHolder;
     }
 
     @Override
-    public void run()
-    {
-        while (running)
-        {
+    public void run() {
+        while (running) {
             startTime = System.nanoTime();
             canvas = null;
 
@@ -64,34 +58,24 @@ public class MainThread extends Thread
         }
     }
 
-    private void drawAndUpdateCanvas()
-    {
+    private void drawAndUpdateCanvas() {
         //series of methods to draw and update game canvas
         //scheme: lock canvas->update and draw on->unlock canvas
-        try
-        {
+        try {
             canvas = this.surfaceHolder.lockCanvas();
 
             //synchronized-> make sure that no other process is messing with canvas right now
-            synchronized (surfaceHolder)
-            {
-                gamePanel.update();
-                gamePanel.draw(canvas);
+            synchronized (surfaceHolder) {
+                gameDrawingPanel.update();
+                gameDrawingPanel.draw(canvas);
             }
-        }
-        catch (Exception e)
-        {
+        } catch (Exception e) {
             System.out.println("Exception main thread: update and draw");
-        }
-        finally
-        {
-            if (canvas != null)
-            {
-                try
-                {
+        } finally {
+            if (canvas != null) {
+                try {
                     surfaceHolder.unlockCanvasAndPost(canvas);
-                }
-                catch (Exception e)
+                } catch (Exception e)
                 {
                     e.printStackTrace();
                 }
@@ -99,29 +83,22 @@ public class MainThread extends Thread
         }
     }
 
-    private void setAppSleep()
-    {
+    private void setAppSleep() {
         //calculate time to put app to sleep, to get target FPS speed, no more
         waitTime = targetTime - timeTaken;
-        if(waitTime > 0)
-        {
-            try
-            {
+        if(waitTime > 0) {
+            try {
                 sleep(waitTime);
-            }
-            catch (Exception e)
-            {
+            } catch (Exception e) {
                 System.out.println("Exception: sleep");
             }
         }
     }
 
-    private void printAverageFPS()
-    {
+    private void printAverageFPS() {
         //TODO:remove that method, just for measuring speed of app in emulator
         //calculate information about current FPS speed of an app
-        if (frameCount == FPS)
-        {
+        if (frameCount == FPS) {
             averageFPS = 1000/((totalTime/frameCount)/1000000);
             System.out.println("Average FPS is: "+averageFPS);
 
@@ -133,8 +110,7 @@ public class MainThread extends Thread
 
 
 
-    public void setRunning(boolean running)
-    {
+    public void setRunning(boolean running) {
         this.running = running;
     }
 }

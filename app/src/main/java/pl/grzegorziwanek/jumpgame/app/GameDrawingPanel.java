@@ -1,5 +1,6 @@
 package pl.grzegorziwanek.jumpgame.app;
 
+import android.annotation.TargetApi;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -8,6 +9,8 @@ import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Rect;
 import android.graphics.Typeface;
+import android.os.Build;
+import android.util.AttributeSet;
 import android.view.MotionEvent;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
@@ -17,6 +20,13 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.Random;
 
+import pl.grzegorziwanek.jumpgame.app.gameobjects.Background;
+import pl.grzegorziwanek.jumpgame.app.gameobjects.objects.Bonus;
+import pl.grzegorziwanek.jumpgame.app.gameobjects.objects.Enemy;
+import pl.grzegorziwanek.jumpgame.app.gameobjects.GameObject;
+import pl.grzegorziwanek.jumpgame.app.gameobjects.GameObjectContainer;
+import pl.grzegorziwanek.jumpgame.app.gameobjects.objects.Player;
+
 /**
  * Created by Grzegorz Iwanek on 24.08.2016.
  * Contains main logic and implementation of a game. Contains surface for drawing on, and implements
@@ -24,8 +34,7 @@ import java.util.Random;
  * Responsible for reading and reacting for each actions of a user, and managing life of objects
  * on a canvas.
  */
-public class GamePanel extends SurfaceView implements SurfaceHolder.Callback
-{
+public class GameDrawingPanel extends SurfaceView implements SurfaceHolder.Callback {
     private MainThread mMainThread;
     private Background mBackground;
     private Bitmap mScaledBackgroundSource;
@@ -44,23 +53,30 @@ public class GamePanel extends SurfaceView implements SurfaceHolder.Callback
     public static int sScreenWidth;
     public static int sScreenHeight;
 
-    private static final Paint squareColor = new Paint(Color.CYAN);
     private static int sBestScore = 0;
     private static int sBonusCollected = 0; //max 3 ( number of cheese pictures to show in interface)
 
-    public GamePanel(Context context)
-    {
+    public GameDrawingPanel(Context context) {
         super(context);
-
         getHolder().addCallback(this);
+        setFocusable(true);
+    }
 
-        //enable reading user touch
+    public GameDrawingPanel(Context context, AttributeSet attrs) {
+        super(context, attrs, 0);
+        getHolder().addCallback(this);
+        setFocusable(true);
+    }
+
+    @TargetApi(Build.VERSION_CODES.LOLLIPOP)
+    public GameDrawingPanel(Context context, AttributeSet attrs, int defStyleAttr) {
+        super(context, attrs, defStyleAttr, 0);
+        getHolder().addCallback(this);
         setFocusable(true);
     }
 
     @Override
-    public void surfaceCreated(SurfaceHolder surfaceHolder)
-    {
+    public void surfaceCreated(SurfaceHolder surfaceHolder) {
         //start thread
         setMainThread();
 
@@ -76,22 +92,17 @@ public class GamePanel extends SurfaceView implements SurfaceHolder.Callback
     }
 
     @Override
-    public void surfaceChanged(SurfaceHolder surfaceHolder, int i, int i1, int i2)
-    {
-    }
+    public void surfaceChanged(SurfaceHolder surfaceHolder, int i, int i1, int i2) {}
 
     @Override
-    public void surfaceDestroyed(SurfaceHolder surfaceHolder)
-    {
+    public void surfaceDestroyed(SurfaceHolder surfaceHolder) {
         //condition for retry loop, because, sometimes it might skip turning off thread
         boolean retry = true;
         int counter = 0;
 
-        while (retry && counter < 1000)
-        {
+        while (retry && counter < 1000) {
             counter++;
-            try
-            {
+            try {
                 //set condition for mainThread while() running false
                 mMainThread.setRunning(false);
                 //block current thread
@@ -100,39 +111,30 @@ public class GamePanel extends SurfaceView implements SurfaceHolder.Callback
                 //set null, so GC will collect it
                 mMainThread = null;
                 retry = false;
-            }
-            catch (InterruptedException e)
-            {
+            } catch (InterruptedException e) {
                 e.printStackTrace();
             }
         }
     }
 
     @Override
-    public boolean onTouchEvent(MotionEvent event)
-    {
+    public boolean onTouchEvent(MotionEvent event) {
         //when screen pressed
-        if(event.getAction() == MotionEvent.ACTION_DOWN)
-        {
+        if(event.getAction() == MotionEvent.ACTION_DOWN) {
             //start game if touched first time
-            if(!mPlayer.getPlaying())
-            {
+            if(!mPlayer.getPlaying()) {
                 mPlayer.setPlaying(true);
                 mPlayer.setGoingUp(true);
                 sEnemyStartTime = System.nanoTime();
                 sBonusStartTime = System.nanoTime();
-            }
-            //if already touched, set going up
-            else
-            {
+            } else {
+                //if already touched, set going up
                 mPlayer.setGoingUp(true);
             }
             //have to return boolean value
             return true;
-        }
-        //when screen released
-        else if(event.getAction() == MotionEvent.ACTION_UP)
-        {
+        } else if(event.getAction() == MotionEvent.ACTION_UP) {
+            //when screen released
             mPlayer.setGoingUp(false);
             return true;
         }
@@ -140,10 +142,8 @@ public class GamePanel extends SurfaceView implements SurfaceHolder.Callback
         return super.onTouchEvent(event);
     }
 
-    public void update()
-    {
-        if (mPlayer.getPlaying())
-        {
+    public void update() {
+        if (mPlayer.getPlaying()) {
             mBackground.update();
             mPlayer.update();
 
@@ -151,27 +151,21 @@ public class GamePanel extends SurfaceView implements SurfaceHolder.Callback
             updateEnemy();
             updateBonus();
             updateObjects();
-        }
-        else
-        {
+        } else {
             setNewGame();
         }
     }
 
-    public void updateVariables()
-    {
-        if (sBestScore < mPlayer.getScore())
-        {
+    public void updateVariables() {
+        if (sBestScore < mPlayer.getScore()) {
             sBestScore = mPlayer.getScore();
         }
     }
 
-    public void updateObjects()
-    {
+    public void updateObjects() {
         //update all objects except player object and background object; sort list according to Y position
         //(sorting, because we want to draw objects in right order); sort ONLY if there is new object on a sorted list
-        if (sObjectAdded)
-        {
+        if (sObjectAdded) {
             sortList();
             sObjectAdded = false;
         }
@@ -181,8 +175,7 @@ public class GamePanel extends SurfaceView implements SurfaceHolder.Callback
         checkCollision();
     }
 
-    private void sortList()
-    {
+    private void sortList() {
         Collections.sort( mGameObjects, new Comparator<GameObjectContainer>() {
             public int compare (GameObjectContainer object1, GameObjectContainer object2) {
                 return object1.comparePosition() - object2.comparePosition();
@@ -190,27 +183,20 @@ public class GamePanel extends SurfaceView implements SurfaceHolder.Callback
         });
     }
 
-    public void updatePosition()
-    {
-        for (int i=0; i<mGameObjects.size(); i++)
-        {
+    public void updatePosition() {
+        for (int i=0; i<mGameObjects.size(); i++) {
             mGameObjects.get(i).update();
-            if (mGameObjects.get(i).getX() < -200)
-            {
+            if (mGameObjects.get(i).getX() < -200) {
                 mGameObjects.remove(i);
             }
         }
     }
 
 
-    public void checkCollision()
-    {
-        for (int i=0; i<mGameObjects.size(); i++)
-        {
-            if(collision(mGameObjects.get(i), mPlayer))
-            {
-                switch (mGameObjects.get(i).getObjectType())
-                {
+    public void checkCollision() {
+        for (int i=0; i<mGameObjects.size(); i++) {
+            if(collision(mGameObjects.get(i), mPlayer)) {
+                switch (mGameObjects.get(i).getObjectType()) {
                     case "ENEMY":
                         mGameObjects.remove(i);
                         mPlayer.setPlaying(false);
@@ -219,12 +205,12 @@ public class GamePanel extends SurfaceView implements SurfaceHolder.Callback
                     case "BONUS_CHEESE":
                         mGameObjects.remove(i);
                         updateBonusValue("BONUS_CHEESE");
-                        mPlayer.addExtraScrore(25);
+                        mPlayer.addExtraScore(25);
                         break;
                     case "BONUS_TRAP":
                         mGameObjects.remove(i);
                         updateBonusValue("BONUS_TRAP");
-                        mPlayer.addExtraScrore(-50);
+                        mPlayer.addExtraScore(-50);
                         break;
                     default:
                         System.out.println("ERROR OF OBJECT TYPE OCCUR: UNDEFINED TYPE OF OBJECT COLLIDING WITH PLAYER");
@@ -234,26 +220,19 @@ public class GamePanel extends SurfaceView implements SurfaceHolder.Callback
         }
     }
 
-    public boolean collision(GameObjectContainer object1, GameObject object2)
-    {
+    public boolean collision(GameObjectContainer object1, GameObject object2) {
         return Rect.intersects(object1.getRectangle(), object2.getRectangle());
     }
 
-    private void updateBonusValue(String collidingObject)
-    {
-        if (collidingObject.equals("BONUS_CHEESE"))
-        {
-            if(sBonusCollected <3)
-            {
+    private void updateBonusValue(String collidingObject) {
+        if (collidingObject.equals("BONUS_CHEESE")) {
+            if(sBonusCollected <3) {
                 sBonusCollected++;
             }
-        }
-        else if (collidingObject.equals("BONUS_TRAP"))
-        {
+        } else if (collidingObject.equals("BONUS_TRAP")) {
             sBonusCollected -= 2;
             //if is below zero, set GAME OVER
-            if (sBonusCollected < 0)
-            {
+            if (sBonusCollected < 0) {
                 mPlayer.setPlaying(false);
                 mMainThread = null;
                 sBonusCollected = 0;
@@ -261,43 +240,35 @@ public class GamePanel extends SurfaceView implements SurfaceHolder.Callback
         }
     }
 
-    public void updateEnemy()
-    {
+    public void updateEnemy() {
         //calculate time passed till now
         long enemyElapsed = (System.nanoTime() - sEnemyStartTime) / 1000000;
 
         //calculate period between spawning enemies ( possible range 1.0 - 2.5 sec); getting shorter;
         long spawnDelay = 4000 - mPlayer.getScore()/3;
-        if(spawnDelay < 1500)
-        {
+        if(spawnDelay < 1500) {
             spawnDelay = 1500;
         }
 
         //spawn enemy on the screen
-        if(enemyElapsed > spawnDelay)
-        {
+        if(enemyElapsed > spawnDelay) {
             spawnEnemy();
             sObjectAdded = true;
         }
     }
 
-    public void spawnEnemy()
-    {
+    public void spawnEnemy() {
         //set random starting position and calculate speed, set caps (inside enemy class - if needed)
         int yRand = (int)(sRand.nextDouble()*sScreenHeight - (100+SPAWNMARGIN));
-        if (yRand < SPAWNMARGIN)
-        {
+        if (yRand < SPAWNMARGIN) {
             yRand = SPAWNMARGIN;
         }
         //set random speed of enemy, hold it between 40 and MOVESPEED (5) of a background
         int speed = 4 + (int)(sRand.nextDouble()*mPlayer.getScore()/20); //rand.nextDouble() gives 1
         System.out.println("speed= " + speed);
-        if (speed < 10)
-        {
+        if (speed < 10) {
             speed = 5;
-        }
-        else if(speed>40)
-        {
+        } else if(speed>40) {
             speed = 40;
         }
 
@@ -308,26 +279,19 @@ public class GamePanel extends SurfaceView implements SurfaceHolder.Callback
         int width = 200;
         int height = 75;
 
-        if (speed == 5)
-        {
+        if (speed == 5) {
             //picture - cat sitting in one place
             image = BitmapFactory.decodeResource(getResources(), R.drawable.cat_sleeping);
             numFrames = 1;
-        }
-        else if (speed < 20)
-        {
+        } else if (speed < 20) {
             //picture - cat walking slowly
             image = BitmapFactory.decodeResource(getResources(), R.drawable.cat_normal_speed);
             numFrames = 12;
-        }
-        else if (speed < 30)
-        {
+        } else if (speed < 30) {
             //picture - cat running slowly
             image = BitmapFactory.decodeResource(getResources(), R.drawable.cat_slow_run);
             numFrames = 16;
-        }
-        else
-        {
+        } else {
             //picture - fast running cat
             image = BitmapFactory.decodeResource(getResources(), R.drawable.cat_sprint_speed);
             numFrames = 13;
@@ -340,36 +304,31 @@ public class GamePanel extends SurfaceView implements SurfaceHolder.Callback
         sEnemyStartTime = System.nanoTime();
     }
 
-    public void updateBonus()
-    {
+    public void updateBonus() {
         //calculate time passed till now
         long bonusElapsed = (System.nanoTime() - sBonusStartTime) / 1000000;
 
         //calculate spawn delay ( time between spawning bonuses)
         long spawnDelay = 5000 - mPlayer.getScore()/5;
-        if(spawnDelay < 2000)
-        {
+        if(spawnDelay < 2000) {
             spawnDelay = 2000;
         }
 
         //spawn object if spawn delay has passed
-        if(bonusElapsed > spawnDelay)
-        {
+        if(bonusElapsed > spawnDelay) {
             spawnBonus();
             sObjectAdded = true;
         }
     }
 
-    public void spawnBonus()
-    {
+    public void spawnBonus() {
         //set random bonus (cheese, trap etc) and random position
         Bitmap image;
         String objectType;
         int yRand;
 
         int type = sRand.nextInt(2);
-        switch (type)
-        {
+        switch (type) {
             case 0:
                 image = BitmapFactory.decodeResource(getResources(), R.drawable.cheese);
                 yRand = (int) (sRand.nextDouble() * sScreenHeight - (SPAWNMARGIN + image.getHeight()));
@@ -390,8 +349,7 @@ public class GamePanel extends SurfaceView implements SurfaceHolder.Callback
         }
 
         //make sure, object is on screen (cant't be below 0-> example: yRand = got 10 - 200(image height) = -190;)
-        if(yRand < SPAWNMARGIN)
-        {
+        if(yRand < SPAWNMARGIN) {
             yRand = SPAWNMARGIN;
         }
 
@@ -407,15 +365,13 @@ public class GamePanel extends SurfaceView implements SurfaceHolder.Callback
     }
 
     @Override
-    public void draw(Canvas canvas)
-    {
+    public void draw(Canvas canvas) {
         super.draw(canvas);
         mBackground.draw(canvas);
 
         //draw objects
         mPlayer.draw(canvas);
-        for (GameObjectContainer gameObjectContainer : mGameObjects)
-        {
+        for (GameObjectContainer gameObjectContainer : mGameObjects) {
             gameObjectContainer.draw(canvas);
         }
 
@@ -424,8 +380,7 @@ public class GamePanel extends SurfaceView implements SurfaceHolder.Callback
         drawBonusBar(canvas);
     }
 
-    public void drawText(Canvas canvas)
-    {
+    public void drawText(Canvas canvas) {
         Paint paint = new Paint();
         paint.setColor(Color.BLACK);
         paint.setTextSize(30);
@@ -435,17 +390,12 @@ public class GamePanel extends SurfaceView implements SurfaceHolder.Callback
         canvas.drawText("BEST SCORE: " + sBestScore, sScreenWidth - 325, sScreenHeight-25, paint);
     }
 
-    public void drawBonusBar(Canvas canvas)
-    {
-        for (int i=0; i<3; i++)
-        {
+    public void drawBonusBar(Canvas canvas) {
+        for (int i=0; i<3; i++) {
             Bitmap image;
-            if (i<sBonusCollected)
-            {
+            if (i<sBonusCollected) {
                 image = BitmapFactory.decodeResource(getResources(), R.drawable.cheese_50x50);
-            }
-            else
-            {
+            } else {
                 image = BitmapFactory.decodeResource(getResources(), R.drawable.x_sign);
             }
 
@@ -453,8 +403,7 @@ public class GamePanel extends SurfaceView implements SurfaceHolder.Callback
         }
     }
 
-    private void setVariables()
-    {
+    private void setVariables() {
         //save screen width and height for further use
         sScreenWidth = getWidth();
         sScreenHeight = getHeight();
@@ -464,8 +413,7 @@ public class GamePanel extends SurfaceView implements SurfaceHolder.Callback
         mScaledBackgroundSource = Bitmap.createScaledBitmap(mBackgroundImage, sScreenWidth, sScreenHeight, true);
     }
 
-    private void setMainThread()
-    {
+    private void setMainThread() {
         //initiate main thread
         mMainThread = new MainThread(getHolder(), this);
 
@@ -474,8 +422,7 @@ public class GamePanel extends SurfaceView implements SurfaceHolder.Callback
         mMainThread.start();
     }
 
-    private void setNewGame()
-    {
+    private void setNewGame() {
         mGameObjects.clear();
 
         mPlayer.resetScore();

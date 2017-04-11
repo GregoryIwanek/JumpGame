@@ -14,4 +14,6 @@
 
     <string name="pref_user_profile">User Profile</string>
     <string name="pref_update_setting">Update Settings</string>
+    <string name="best_score_str">BEST SCORE</string>
+    <string name="score_str">SCORE</string>
 </resources>

@@ -1,21 +1,20 @@
-package pl.grzegorziwanek.jumpgame.app;
+package pl.grzegorziwanek.jumpgame.app.gameobjects.objects;
 
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 
-/**
- * Created by Grzegorz Iwanek on 26.08.2016.
- */
-public class Enemy extends GameObject implements GameObjectService
-{
+import pl.grzegorziwanek.jumpgame.app.utilis.CustomAnimation;
+import pl.grzegorziwanek.jumpgame.app.gameobjects.GameObject;
+import pl.grzegorziwanek.jumpgame.app.gameobjects.GameObjectService;
+
+public class Enemy extends GameObject implements GameObjectService {
     private int mSpeed;
-    private MyAnimation mAnimation = new MyAnimation();
+    private CustomAnimation mAnimation = new CustomAnimation();
     private Bitmap mFramesheet;
 
     private String mTypeOfObject = "enemy";
 
-    public Enemy(Bitmap res, int x, int y, int width, int height, int speed, int numFrames, String type)
-    {
+    public Enemy(Bitmap res, int x, int y, int width, int height, int speed, int numFrames, String type) {
         mObjectType = type;
         mX = x;
         mY = y;
@@ -25,8 +24,7 @@ public class Enemy extends GameObject implements GameObjectService
 
         Bitmap[] imageArray = new Bitmap[numFrames];
         mFramesheet = res;
-        for (int i=0; i<imageArray.length; i++)
-        {
+        for (int i=0; i<imageArray.length; i++) {
             imageArray[i] = Bitmap.createBitmap(mFramesheet, 0, i*mHeight, mWidth, mHeight);
         }
 
@@ -35,21 +33,16 @@ public class Enemy extends GameObject implements GameObjectService
     }
 
     @Override
-    public void update()
-    {
+    public void update() {
         mX -= mSpeed;
         mAnimation.update();
     }
 
     @Override
-    public void draw(Canvas canvas)
-    {
-        try
-        {
+    public void draw(Canvas canvas) {
+        try {
             canvas.drawBitmap(mAnimation.getImage(), mX, mY, null);
-        }
-        catch (Exception e)
-        {
+        } catch (Exception e) {
             System.out.println("Enemy, drawing exception!");
         }
     }

@@ -1,7 +1,9 @@
 package pl.grzegorziwanek.jumpgame.app;
 
 import android.app.Activity;
-import android.content.Intent;
+import android.app.Fragment;
+import android.app.FragmentManager;
+import android.app.FragmentTransaction;
 import android.os.Bundle;
 import android.view.Window;
 import android.view.WindowManager;
@@ -9,22 +11,21 @@ import android.view.WindowManager;
 /**
  * Created by Grzegorz Iwanek on 24.08.2016.
  */
-public class JumpGame extends Activity
-{
-
+public class JumpGame extends Activity {
     @Override
-    protected void onCreate(Bundle savedInstanceState)
-    {
+    protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
-        //turning off title
         requestWindowFeature(Window.FEATURE_NO_TITLE);
+        getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,
+                WindowManager.LayoutParams.FLAG_FULLSCREEN);
 
-        //set screen to always full screen
-        getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
+        setContentView(R.layout.activity_main);
 
-        //run the MainMenu
-        Intent intent = new Intent(this, MainMenu.class);
-        startActivity(intent);
+        Fragment fragment = new GameFragment();
+        FragmentManager fragmentManager = getFragmentManager();
+        FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
+        fragmentTransaction.replace(R.id.contentFrame, fragment);
+        fragmentTransaction.addToBackStack(null);
+        fragmentTransaction.commit();
     }
 }

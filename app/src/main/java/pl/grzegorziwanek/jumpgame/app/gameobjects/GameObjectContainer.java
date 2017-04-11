@@ -1,53 +1,42 @@
-package pl.grzegorziwanek.jumpgame.app;
+package pl.grzegorziwanek.jumpgame.app.gameobjects;
 
 import android.graphics.Canvas;
 import android.graphics.Rect;
 
-/**
- * Created by Grzegorz Iwanek on 28.08.2016.
- */
-public class GameObjectContainer implements GameObjectService
-{
+public class GameObjectContainer implements GameObjectService {
     private GameObjectService mGameObjectService;
 
-    public GameObjectContainer(GameObjectService gameObjectService)
-    {
+    public GameObjectContainer(GameObjectService gameObjectService) {
         mGameObjectService = gameObjectService;
     }
 
     @Override
-    public void update()
-    {
+    public void update() {
         mGameObjectService.update();
     }
 
     @Override
-    public void draw(Canvas canvas)
-    {
+    public void draw(Canvas canvas) {
         mGameObjectService.draw(canvas);
     }
 
     @Override
-    public int getX()
-    {
+    public int getX() {
         return mGameObjectService.getX();
     }
 
     @Override
-    public int comparePosition()
-    {
+    public int comparePosition() {
         return mGameObjectService.comparePosition();
     }
 
     @Override
-    public Rect getRectangle()
-    {
+    public Rect getRectangle() {
         return mGameObjectService.getRectangle();
     }
 
     @Override
-    public String getObjectType()
-    {
+    public String getObjectType() {
         return mGameObjectService.getObjectType();
     }
 }
