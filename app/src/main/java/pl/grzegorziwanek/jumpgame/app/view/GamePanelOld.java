@@ -1,4 +1,4 @@
-package pl.grzegorziwanek.jumpgame.app;
+package pl.grzegorziwanek.jumpgame.app.view;
 
 import android.annotation.TargetApi;
 import android.content.Context;
@@ -20,12 +20,14 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.Random;
 
-import pl.grzegorziwanek.jumpgame.app.gameobjects.Background;
-import pl.grzegorziwanek.jumpgame.app.gameobjects.objects.Bonus;
-import pl.grzegorziwanek.jumpgame.app.gameobjects.objects.Enemy;
-import pl.grzegorziwanek.jumpgame.app.gameobjects.GameObject;
-import pl.grzegorziwanek.jumpgame.app.gameobjects.GameObjectContainer;
-import pl.grzegorziwanek.jumpgame.app.gameobjects.objects.Player;
+import pl.grzegorziwanek.jumpgame.app.models.gamemodel.sessionmodel.SessionThreadddd;
+import pl.grzegorziwanek.jumpgame.app.R;
+import pl.grzegorziwanek.jumpgame.app.models.gameobjects.Background;
+import pl.grzegorziwanek.jumpgame.app.models.gameobjects.objects.bonus.Bonus;
+import pl.grzegorziwanek.jumpgame.app.models.gameobjects.objects.Enemy;
+import pl.grzegorziwanek.jumpgame.app.models.gameobjects.objects.GameObject;
+import pl.grzegorziwanek.jumpgame.app.models.gameobjects.GameObjectContainer;
+import pl.grzegorziwanek.jumpgame.app.models.gameobjects.objects.Player;
 
 /**
  * Created by Grzegorz Iwanek on 24.08.2016.
@@ -34,11 +36,12 @@ import pl.grzegorziwanek.jumpgame.app.gameobjects.objects.Player;
  * Responsible for reading and reacting for each actions of a user, and managing life of objects
  * on a canvas.
  */
-public class GameDrawingPanel extends SurfaceView implements SurfaceHolder.Callback {
-    private MainThread mMainThread;
+public class GamePanelOld extends SurfaceView implements SurfaceHolder.Callback {
+    private SessionThreadddd mSessionThread;
     private Background mBackground;
     private Bitmap mScaledBackgroundSource;
-    private Player mPlayer;
+    // TODO: 11.04.2017 change back to private, remove objects from GamePanel into separated class
+    public Player mPlayer;
 
     //container list for all game objects, except Player object
     private ArrayList<GameObjectContainer> mGameObjects;
@@ -56,20 +59,21 @@ public class GameDrawingPanel extends SurfaceView implements SurfaceHolder.Callb
     private static int sBestScore = 0;
     private static int sBonusCollected = 0; //max 3 ( number of cheese pictures to show in interface)
 
-    public GameDrawingPanel(Context context) {
+    public GamePanelOld(Context context) {
         super(context);
         getHolder().addCallback(this);
         setFocusable(true);
+        System.out.println("called constructor of GamePanel");
     }
 
-    public GameDrawingPanel(Context context, AttributeSet attrs) {
+    public GamePanelOld(Context context, AttributeSet attrs) {
         super(context, attrs, 0);
         getHolder().addCallback(this);
         setFocusable(true);
     }
 
     @TargetApi(Build.VERSION_CODES.LOLLIPOP)
-    public GameDrawingPanel(Context context, AttributeSet attrs, int defStyleAttr) {
+    public GamePanelOld(Context context, AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr, 0);
         getHolder().addCallback(this);
         setFocusable(true);
@@ -77,6 +81,7 @@ public class GameDrawingPanel extends SurfaceView implements SurfaceHolder.Callb
 
     @Override
     public void surfaceCreated(SurfaceHolder surfaceHolder) {
+        System.out.println("GamePanel - surfaceCreated");
         //start thread
         setMainThread();
 
@@ -92,10 +97,13 @@ public class GameDrawingPanel extends SurfaceView implements SurfaceHolder.Callb
     }
 
     @Override
-    public void surfaceChanged(SurfaceHolder surfaceHolder, int i, int i1, int i2) {}
+    public void surfaceChanged(SurfaceHolder surfaceHolder, int i, int i1, int i2) {
+        System.out.println("GamePanel - surfaceChanged");
+    }
 
     @Override
     public void surfaceDestroyed(SurfaceHolder surfaceHolder) {
+        System.out.println("GamePanel - surfaceDestroyed");
         //condition for retry loop, because, sometimes it might skip turning off thread
         boolean retry = true;
         int counter = 0;
@@ -104,12 +112,12 @@ public class GameDrawingPanel extends SurfaceView implements SurfaceHolder.Callb
             counter++;
             try {
                 //set condition for mainThread while() running false
-                mMainThread.setRunning(false);
+                mSessionThread.setRunning(false);
                 //block current thread
-                mMainThread.join();
+                mSessionThread.join();
 
                 //set null, so GC will collect it
-                mMainThread = null;
+                mSessionThread = null;
                 retry = false;
             } catch (InterruptedException e) {
                 e.printStackTrace();
@@ -200,7 +208,7 @@ public class GameDrawingPanel extends SurfaceView implements SurfaceHolder.Callb
                     case "ENEMY":
                         mGameObjects.remove(i);
                         mPlayer.setPlaying(false);
-                        mMainThread = null;
+                        mSessionThread = null;
                         break;
                     case "BONUS_CHEESE":
                         mGameObjects.remove(i);
@@ -234,7 +242,7 @@ public class GameDrawingPanel extends SurfaceView implements SurfaceHolder.Callb
             //if is below zero, set GAME OVER
             if (sBonusCollected < 0) {
                 mPlayer.setPlaying(false);
-                mMainThread = null;
+                mSessionThread = null;
                 sBonusCollected = 0;
             }
         }
@@ -265,7 +273,6 @@ public class GameDrawingPanel extends SurfaceView implements SurfaceHolder.Callb
         }
         //set random speed of enemy, hold it between 40 and MOVESPEED (5) of a background
         int speed = 4 + (int)(sRand.nextDouble()*mPlayer.getScore()/20); //rand.nextDouble() gives 1
-        System.out.println("speed= " + speed);
         if (speed < 10) {
             speed = 5;
         } else if(speed>40) {
@@ -415,11 +422,11 @@ public class GameDrawingPanel extends SurfaceView implements SurfaceHolder.Callb
 
     private void setMainThread() {
         //initiate main thread
-        mMainThread = new MainThread(getHolder(), this);
+        mSessionThread = new SessionThreadddd(getHolder(), this);
 
         //turn on main thread and game
-        mMainThread.setRunning(true);
-        mMainThread.start();
+        mSessionThread.setRunning(true);
+        mSessionThread.start();
     }
 
     private void setNewGame() {

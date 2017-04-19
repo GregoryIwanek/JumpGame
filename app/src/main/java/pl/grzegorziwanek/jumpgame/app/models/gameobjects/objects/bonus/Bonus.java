@@ -1,10 +1,10 @@
-package pl.grzegorziwanek.jumpgame.app.gameobjects.objects;
+package pl.grzegorziwanek.jumpgame.app.models.gameobjects.objects.bonus;
 
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 
-import pl.grzegorziwanek.jumpgame.app.gameobjects.GameObject;
-import pl.grzegorziwanek.jumpgame.app.gameobjects.GameObjectService;
+import pl.grzegorziwanek.jumpgame.app.models.gameobjects.objects.GameObject;
+import pl.grzegorziwanek.jumpgame.app.models.gameobjects.GameObjectService;
 
 /**
  * Created by Grzegorz Iwanek on 27.08.2016.

@@ -1,4 +1,4 @@
-package pl.grzegorziwanek.jumpgame.app.gameobjects;
+package pl.grzegorziwanek.jumpgame.app.models.gameobjects.objects;
 
 import android.graphics.Rect;
 
@@ -57,7 +57,8 @@ public abstract class GameObject implements Comparable<GameObject> {
         return (mY + mHeight);
     }
 
-    //get for checking collision
+    // get for checking collision, smaller than real one to prevent collision with "empty spot"
+    // in the png pictures
     public Rect getRectangle() {
         return new Rect(
                 (int)(mX + 0.1*mWidth),

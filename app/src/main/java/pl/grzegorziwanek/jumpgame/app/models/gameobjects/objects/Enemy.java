@@ -1,11 +1,10 @@
-package pl.grzegorziwanek.jumpgame.app.gameobjects.objects;
+package pl.grzegorziwanek.jumpgame.app.models.gameobjects.objects;
 
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 
 import pl.grzegorziwanek.jumpgame.app.utilis.CustomAnimation;
-import pl.grzegorziwanek.jumpgame.app.gameobjects.GameObject;
-import pl.grzegorziwanek.jumpgame.app.gameobjects.GameObjectService;
+import pl.grzegorziwanek.jumpgame.app.models.gameobjects.GameObjectService;
 
 public class Enemy extends GameObject implements GameObjectService {
     private int mSpeed;

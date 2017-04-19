@@ -1,13 +1,12 @@
-package pl.grzegorziwanek.jumpgame.app.gameobjects.objects;
+package pl.grzegorziwanek.jumpgame.app.models.gameobjects.objects;
 
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Rect;
 
-import pl.grzegorziwanek.jumpgame.app.GameDrawingPanel;
+import pl.grzegorziwanek.jumpgame.app.view.GamePanelOld;
 import pl.grzegorziwanek.jumpgame.app.utilis.CustomAnimation;
-import pl.grzegorziwanek.jumpgame.app.gameobjects.GameObject;
-import pl.grzegorziwanek.jumpgame.app.gameobjects.GameObjectService;
+import pl.grzegorziwanek.jumpgame.app.models.gameobjects.GameObjectService;
 import pl.grzegorziwanek.jumpgame.app.utilis.Cons;
 
 /**
@@ -37,7 +36,7 @@ public class Player extends GameObject implements GameObjectService {
 
         //set starting position
         mX = Cons.STARTPOSITION;
-        mY = GameDrawingPanel.sScreenHeight/2;
+        mY = GamePanelOld.sScreenHeight/2;
 
         //set score and Y axis speed
         mScore = 0;
@@ -70,7 +69,8 @@ public class Player extends GameObject implements GameObjectService {
         updateScore();
         updateAnimation();
         updateSpeed();
-        updatePosition();
+        // TODO: 11.04.2017 bind this with buttons from UI
+        //updatePosition();
     }
 
     private void updateScore() {
@@ -107,10 +107,10 @@ public class Player extends GameObject implements GameObjectService {
     private void updatePosition() {
         //update position on Y axis
         mY += mDy*2;
-        if (mY <= GameDrawingPanel.SPAWNMARGIN) {
-            mY = GameDrawingPanel.SPAWNMARGIN;
-        } else if (mY >= GameDrawingPanel.sScreenHeight - mHeight - GameDrawingPanel.SPAWNMARGIN) {
-            mY = GameDrawingPanel.sScreenHeight - mHeight - GameDrawingPanel.SPAWNMARGIN;
+        if (mY <= GamePanelOld.SPAWNMARGIN) {
+            mY = GamePanelOld.SPAWNMARGIN;
+        } else if (mY >= GamePanelOld.sScreenHeight - mHeight - GamePanelOld.SPAWNMARGIN) {
+            mY = GamePanelOld.sScreenHeight - mHeight - GamePanelOld.SPAWNMARGIN;
         }
     }
 

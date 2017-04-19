@@ -1,4 +1,4 @@
-package pl.grzegorziwanek.jumpgame.app.gameobjects;
+package pl.grzegorziwanek.jumpgame.app.models.gameobjects;
 
 import android.graphics.Canvas;
 import android.graphics.Rect;
