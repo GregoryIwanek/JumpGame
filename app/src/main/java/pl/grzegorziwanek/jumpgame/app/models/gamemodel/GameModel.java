@@ -1,16 +1,15 @@
 package pl.grzegorziwanek.jumpgame.app.models.gamemodel;
 
-import android.app.Activity;
 import android.content.Context;
-import android.view.View;
 
 import java.util.ArrayList;
 
-import pl.grzegorziwanek.jumpgame.app.R;
+import pl.grzegorziwanek.jumpgame.app.models.gamemodel.panelmodel.GamePanel;
 import pl.grzegorziwanek.jumpgame.app.models.gamemodel.sessionmodel.SessionData;
 import pl.grzegorziwanek.jumpgame.app.models.gamemodel.sessionmodel.SessionThread;
-import pl.grzegorziwanek.jumpgame.app.models.gamemodel.panelmodel.GamePanel;
+import pl.grzegorziwanek.jumpgame.app.models.gameobjects.Background;
 import pl.grzegorziwanek.jumpgame.app.models.gameobjects.GameObjectContainer;
+import pl.grzegorziwanek.jumpgame.app.models.gameobjects.objects.Player;
 
 public class GameModel {
 
@@ -20,8 +19,6 @@ public class GameModel {
     private SessionThread mSessionThread;
 
     public GameModel(Context context, GamePanel gamePanel) {
-        System.out.println("GameModel constructor called");
-        System.out.println("GameModel THIS address is: " + this);
         mContext = context;
 
         mGamePanel = gamePanel;
@@ -45,9 +42,9 @@ public class GameModel {
 
         mSessionData = new SessionData(context, new Callbacks.DataCallback() {
             @Override
-            public void onDataUpdated(ArrayList<GameObjectContainer> list) {
-                System.out.println("onDataUpdated");
-                mGamePanel.draw(list);
+            public void onDataUpdated(Background background,
+                                      Player player, ArrayList<GameObjectContainer> otherList) {
+                mGamePanel.draw(background, player, otherList);
             }
         });
 

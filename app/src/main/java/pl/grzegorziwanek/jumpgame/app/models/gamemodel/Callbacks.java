@@ -2,7 +2,9 @@ package pl.grzegorziwanek.jumpgame.app.models.gamemodel;
 
 import java.util.ArrayList;
 
+import pl.grzegorziwanek.jumpgame.app.models.gameobjects.Background;
 import pl.grzegorziwanek.jumpgame.app.models.gameobjects.GameObjectContainer;
+import pl.grzegorziwanek.jumpgame.app.models.gameobjects.objects.Player;
 
 public interface Callbacks {
 
@@ -15,7 +17,8 @@ public interface Callbacks {
 
     interface DataCallback {
 
-        void onDataUpdated(ArrayList<GameObjectContainer> list);
+        void onDataUpdated(Background background, Player player,
+                           ArrayList<GameObjectContainer> list);
     }
 
     interface PanelCallback {

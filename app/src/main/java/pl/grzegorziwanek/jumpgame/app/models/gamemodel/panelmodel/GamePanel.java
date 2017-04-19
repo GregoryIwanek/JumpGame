@@ -10,7 +10,10 @@ import android.view.SurfaceView;
 import java.util.ArrayList;
 
 import pl.grzegorziwanek.jumpgame.app.models.gamemodel.Callbacks.PanelCallback;
+import pl.grzegorziwanek.jumpgame.app.models.gameobjects.Background;
 import pl.grzegorziwanek.jumpgame.app.models.gameobjects.GameObjectContainer;
+import pl.grzegorziwanek.jumpgame.app.models.gameobjects.GameObjectService;
+import pl.grzegorziwanek.jumpgame.app.models.gameobjects.objects.Player;
 
 public class GamePanel extends SurfaceView implements SurfaceHolder.Callback {
 
@@ -20,11 +23,6 @@ public class GamePanel extends SurfaceView implements SurfaceHolder.Callback {
 
     public GamePanel(Context context) {
         super(context);
-        System.out.println("constructor 1");
-        System.out.println("this address is: " + this);
-        System.out.println("callback address is: ");
-        System.out.println("constructor 1");
-        System.out.println("callback after initiation is: " + mCallback);
         initVariables(context);
     }
 
@@ -45,6 +43,7 @@ public class GamePanel extends SurfaceView implements SurfaceHolder.Callback {
     }
 
     public void lockCanvas() {
+        mCanvas = null;
         mCanvas = getHolder().lockCanvas();
         mCallback.onCanvasLocked();
     }
@@ -72,23 +71,17 @@ public class GamePanel extends SurfaceView implements SurfaceHolder.Callback {
     @Override
     public boolean onTouchEvent(MotionEvent event) {
         if (event.getAction() == MotionEvent.ACTION_DOWN) {
-            System.out.println("on touch");
-            System.out.println("this address is: " + this);
-            System.out.println("callback address is: " + mCallback);
-            System.out.println("on touch");
             mCallback.onTouchEventOccurred();
         }
         return super.onTouchEvent(event);
     }
 
-    public void draw(ArrayList<GameObjectContainer> list) {
+    public void draw(Background background, Player player, ArrayList<GameObjectContainer> list) {
+        super.draw(mCanvas);
+        background.draw(mCanvas);
+        player.draw(mCanvas);
         for (GameObjectContainer object : list) {
             object.draw(mCanvas);
         }
-    }
-
-    @Override
-    public void draw(Canvas canvas) {
-        super.draw(canvas);
     }
 }

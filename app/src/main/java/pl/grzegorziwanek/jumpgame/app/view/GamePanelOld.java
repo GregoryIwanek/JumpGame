@@ -89,7 +89,7 @@ public class GamePanelOld extends SurfaceView implements SurfaceHolder.Callback 
         setVariables();
 
         //set objects
-        mBackground = new Background(mScaledBackgroundSource);
+        mBackground = new Background(mScaledBackgroundSource, sScreenWidth);
         mPlayer = new Player(BitmapFactory.decodeResource(getResources(), R.drawable.mouse_walk), 50, 50, 12);
 
         mGameObjects = new ArrayList<>();

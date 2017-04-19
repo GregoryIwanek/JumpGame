@@ -2,7 +2,9 @@ package pl.grzegorziwanek.jumpgame.app.models.gameobjects;
 
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
+import android.graphics.Rect;
 
+import pl.grzegorziwanek.jumpgame.app.models.gameobjects.objects.GameObject;
 import pl.grzegorziwanek.jumpgame.app.view.GamePanelOld;
 
 /**
@@ -16,9 +18,11 @@ public class Background {
     private int x = 0;
     private int y = 0;
     private int dx = 0;
+    private int mScreenWidth = 0;
 
-    public Background(Bitmap image) {
+    public Background(Bitmap image, int screenWidth) {
         this.image = image;
+        mScreenWidth = screenWidth;
         this.dx = GamePanelOld.MOVESPEED;
     }
 
@@ -27,7 +31,7 @@ public class Background {
         x+=dx;
 
         //if image is off screen, reset it's position to start position
-        if (x <= -GamePanelOld.sScreenWidth) {
+        if (x <= -mScreenWidth) {
             x=0;
         }
     }
@@ -37,10 +41,10 @@ public class Background {
         canvas.drawBitmap(image, x, y, null);
 
         //draw second image, just right after first one ( illusion of constant backgrount terrain)
-        canvas.drawBitmap(image, x+ GamePanelOld.sScreenWidth, y, null);
+        canvas.drawBitmap(image, x+ mScreenWidth, y, null);
 
         //TODO: test one below on real phone, not in emulator, to make sure it's needed
         //Just in case: in emulator there is a black space for a second, after resetting images x position (update() method)
-        canvas.drawBitmap(image, x+2* GamePanelOld.sScreenWidth, y, null);
+        canvas.drawBitmap(image, x+2*mScreenWidth, y, null);
     }
 }

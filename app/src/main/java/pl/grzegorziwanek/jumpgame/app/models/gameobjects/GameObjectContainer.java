@@ -6,6 +6,8 @@ import android.graphics.Rect;
 public class GameObjectContainer implements GameObjectService {
     private GameObjectService mGameObjectService;
 
+    public GameObjectContainer() {}
+
     public GameObjectContainer(GameObjectService gameObjectService) {
         mGameObjectService = gameObjectService;
     }

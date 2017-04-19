@@ -52,7 +52,6 @@ public class SessionData {
     }
 
     private void initVariables() {
-        //save screen mWidth and mHeight for further use
         mWidth = mContext.getResources().getDisplayMetrics().widthPixels;
         mHeight = mContext.getResources().getDisplayMetrics().heightPixels;
         mBestScore = 0;
@@ -65,7 +64,7 @@ public class SessionData {
         // background
         Bitmap backImage = BitmapFactory.decodeResource(mContext.getResources(), R.drawable.floor_background);
         mScaledImage = Bitmap.createScaledBitmap(backImage, mWidth, mHeight, true);
-        mBackground = new Background(mScaledImage);
+        mBackground = new Background(mScaledImage, mWidth);
 
         mPlayer = new Player(BitmapFactory.decodeResource(mContext.getResources(), R.drawable.mouse_walk), 50, 50, 12);
         mGameObjects = new ArrayList<>();
@@ -78,8 +77,7 @@ public class SessionData {
         updateEnemy();
         updateBonus();
         updateObjects();
-        System.out.println("size of mgameobjects is: " + mGameObjects.size());
-        mCallback.onDataUpdated(mGameObjects);
+        mCallback.onDataUpdated(mBackground, mPlayer, mGameObjects);
     }
 
     private void updateVariables() {
@@ -298,7 +296,11 @@ public class SessionData {
         mBonusStartTime = 0;
         sObjectWasAdded = false;
         mBonusCollected = 0;
-        mCallback.onDataUpdated(mGameObjects);
+        mCallback.onDataUpdated(mBackground, mPlayer, mGameObjects);
+    }
+
+    public Background getBackground() {
+        return mBackground;
     }
 
     public boolean isRunning() {
