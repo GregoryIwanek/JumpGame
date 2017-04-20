@@ -19,6 +19,10 @@ public interface Callbacks {
 
         void onDataUpdated(Background background, Player player,
                            ArrayList<GameObjectContainer> list);
+
+        void onBonusCollected(int bonusCount);
+
+        void onScoreChanged(int score, int bestScore);
     }
 
     interface PanelCallback {

@@ -125,30 +125,30 @@ public class GamePanelOld extends SurfaceView implements SurfaceHolder.Callback 
         }
     }
 
-    @Override
-    public boolean onTouchEvent(MotionEvent event) {
-        //when screen pressed
-        if(event.getAction() == MotionEvent.ACTION_DOWN) {
-            //start game if touched first time
-            if(!mPlayer.getPlaying()) {
-                mPlayer.setPlaying(true);
-                mPlayer.setGoingUp(true);
-                sEnemyStartTime = System.nanoTime();
-                sBonusStartTime = System.nanoTime();
-            } else {
-                //if already touched, set going up
-                mPlayer.setGoingUp(true);
-            }
-            //have to return boolean value
-            return true;
-        } else if(event.getAction() == MotionEvent.ACTION_UP) {
-            //when screen released
-            mPlayer.setGoingUp(false);
-            return true;
-        }
-
-        return super.onTouchEvent(event);
-    }
+//    @Override
+//    public boolean onTouchEvent(MotionEvent event) {
+//        //when screen pressed
+//        if(event.getAction() == MotionEvent.ACTION_DOWN) {
+//            //start game if touched first time
+//            if(!mPlayer.getPlaying()) {
+//                mPlayer.setPlaying(true);
+//                mPlayer.setGoingUp(true);
+//                sEnemyStartTime = System.nanoTime();
+//                sBonusStartTime = System.nanoTime();
+//            } else {
+//                //if already touched, set going up
+//                mPlayer.setGoingUp(true);
+//            }
+//            //have to return boolean value
+//            return true;
+//        } else if(event.getAction() == MotionEvent.ACTION_UP) {
+//            //when screen released
+//            mPlayer.setGoingUp(false);
+//            return true;
+//        }
+//
+//        return super.onTouchEvent(event);
+//    }
 
     public void update() {
         if (mPlayer.getPlaying()) {

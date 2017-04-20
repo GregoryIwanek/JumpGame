@@ -1,24 +1,43 @@
 package pl.grzegorziwanek.jumpgame.app.viewmodel;
 
 import android.content.Context;
+import android.databinding.BaseObservable;
+import android.databinding.Bindable;
+import android.databinding.ObservableInt;
 import android.view.View;
 
-import java.util.Observable;
-
+import pl.grzegorziwanek.jumpgame.app.BR;
 import pl.grzegorziwanek.jumpgame.app.models.gamemodel.GameModel;
 import pl.grzegorziwanek.jumpgame.app.models.gamemodel.panelmodel.GamePanel;
 
-public class GameViewModel extends Observable {
+public class GameViewModel extends BaseObservable {
 
     private Context mContext;
     private GameModel mGameModel;
-    private String score = "SCORE 0";
-    private String bestScore = "BEST SCORE 0";
+    @Bindable
+    private ObservableInt mBonusNum = new ObservableInt(0);
+    @Bindable
+    private ObservableInt mScore = new ObservableInt(0);
+    @Bindable
+    ObservableInt mBestScore = new ObservableInt(0);
 
     public GameViewModel(Context context, GamePanel gamePanel) {
-        System.out.println("GameViewModel constructor called");
         mContext = context;
-        mGameModel = new GameModel(context, gamePanel);
+        mGameModel = new GameModel(context, gamePanel, new CallbackViewModel() {
+            @Override
+            public void onBonusCollected(int bonusCount) {
+                mBonusNum.set(bonusCount);
+                notifyChange();
+            }
+
+            @Override
+            public void onScoreChanged(int score, int bestScore) {
+                mScore.set(score);
+                mBestScore.set(bestScore);
+                notifyPropertyChanged(BR.score);
+                notifyPropertyChanged(BR.bestScore);
+            }
+        });
     }
 
     public void onItemClick(View view) {
@@ -28,9 +47,11 @@ public class GameViewModel extends Observable {
     }
 
     public void onButtonUpClick(View view) {
+        mGameModel.movePlayerUp();
     }
 
     public void onButtonDownClick(View view) {
+        mGameModel.movePlayerDown();
     }
 
     public GamePanel getPanelForBinding() {
@@ -41,14 +62,19 @@ public class GameViewModel extends Observable {
 
     }
 
+    @Bindable
     public String getScore() {
-        System.out.println(mGameModel.getScore());
-        return mGameModel.getScore();
+        return "SCORE " + mScore.get();
     }
 
+    @Bindable
     public String getBestScore() {
-        System.out.println(mGameModel.getBestScore());
-        return mGameModel.getBestScore();
+        return "BEST SCORE " + mBestScore.get();
+    }
+
+    @Bindable
+    public int getBonusNum() {
+        return mBonusNum.get();
     }
 }
 

@@ -9,7 +9,7 @@ public class SessionThread extends Thread {
 
     private ThreadCallback mCallback;
     private SurfaceHolder mSurfaceHolder;
-    private boolean mRunning;
+    private boolean isRunning;
     private long mTargetTime = 1000/Cons.TARGET_FPS;
     private long mStartTime = 0;
     private long mTameTaken = 0;
@@ -26,7 +26,7 @@ public class SessionThread extends Thread {
     @Override
     public void run() {
         // game loop
-        while (mRunning) {
+        while (isRunning) {
             mStartTime = System.nanoTime();
 
             drawAndUpdateCanvas();
@@ -80,7 +80,11 @@ public class SessionThread extends Thread {
     }
 
     public void setRunning(boolean running) {
-        mRunning = running;
+        isRunning = running;
+    }
+
+    public boolean isRunning() {
+        return isRunning;
     }
 }
 

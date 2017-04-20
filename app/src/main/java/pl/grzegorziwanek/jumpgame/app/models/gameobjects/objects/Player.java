@@ -1,9 +1,12 @@
 package pl.grzegorziwanek.jumpgame.app.models.gameobjects.objects;
 
+import android.databinding.Bindable;
+import android.databinding.ObservableInt;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Rect;
 
+import pl.grzegorziwanek.jumpgame.app.BR;
 import pl.grzegorziwanek.jumpgame.app.view.GamePanelOld;
 import pl.grzegorziwanek.jumpgame.app.utilis.CustomAnimation;
 import pl.grzegorziwanek.jumpgame.app.models.gameobjects.GameObjectService;
@@ -18,7 +21,6 @@ public class Player extends GameObject implements GameObjectService {
     private Bitmap mFramesheet; //bitmap with frame pictures
     private CustomAnimation mCustomAnimation;
     private int mScore;
-    private boolean mGoingUp; //will be true if player touches a screen
     private boolean mPlaying; //true, if game is running
     private long mStartTime; //used for change frames pictures
 
@@ -65,12 +67,9 @@ public class Player extends GameObject implements GameObjectService {
 
     @Override
     public void update() {
-        //methods for updating state of player object
         updateScore();
         updateAnimation();
-        updateSpeed();
-        // TODO: 11.04.2017 bind this with buttons from UI
-        //updatePosition();
+        updatePosition();
     }
 
     private void updateScore() {
@@ -91,26 +90,12 @@ public class Player extends GameObject implements GameObjectService {
         mCustomAnimation.update();
     }
 
-    private void updateSpeed() {
-        //change speed, depending on if player touches a screen or not (mGoingUP); set it capped between -7/7;
-        if (mGoingUp) {
-            if(mDy > -7) {
-                mDy -= 1;
-            }
-        } else {
-            if (mDy < 7) {
-                mDy += 1;
-            }
-        }
-    }
-
     private void updatePosition() {
-        //update position on Y axis
         mY += mDy*2;
-        if (mY <= GamePanelOld.SPAWNMARGIN) {
-            mY = GamePanelOld.SPAWNMARGIN;
-        } else if (mY >= GamePanelOld.sScreenHeight - mHeight - GamePanelOld.SPAWNMARGIN) {
-            mY = GamePanelOld.sScreenHeight - mHeight - GamePanelOld.SPAWNMARGIN;
+        if (mY <= mYTopLimit) {
+            mY = mYTopLimit;
+        } else if (mY >= mYBottomLimit) {
+            mY = mYBottomLimit;
         }
     }
 
@@ -123,9 +108,22 @@ public class Player extends GameObject implements GameObjectService {
             System.out.println("Player, drawing exception!");
         }
     }
-    public void setGoingUp(boolean goingUp) {
-        //set if vector is up( true-player touches screen)/ down( false-player released screen)
-        mGoingUp = goingUp;
+
+    public void moveUp() {
+        mYTopLimit = mY - 50;
+        mDy = -7;
+        if (mYTopLimit <= Cons.SPAWNMARGIN) {
+            mYTopLimit = Cons.SPAWNMARGIN;
+        }
+    }
+
+    public void moveDown() {
+        mYBottomLimit = mY + 50;
+        mDy = 7;
+        System.out.println(Cons.sScreenHeight);
+        if (mYBottomLimit >= Cons.sScreenHeight - mHeight - Cons.SPAWNMARGIN) {
+            mYBottomLimit = Cons.sScreenHeight - mHeight - Cons.SPAWNMARGIN;
+        }
     }
 
     public void setPlaying(boolean playing) {

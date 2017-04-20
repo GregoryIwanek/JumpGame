@@ -6,8 +6,8 @@ public abstract class Cons {
     public static final int STARTPOSITION = 150; //starting position of a player
     public static final int TARGET_FPS = 30;//target FPS of game
 
-    public static int sScreenWidth;
-    public static int sScreenHeight;
+    public static int sScreenWidth = 0;
+    public static int sScreenHeight = 0;
 
     public static void initScreenSize(int width, int height) {
         sScreenWidth = width;

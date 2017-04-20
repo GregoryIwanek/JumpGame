@@ -10,17 +10,19 @@ import pl.grzegorziwanek.jumpgame.app.models.gamemodel.sessionmodel.SessionThrea
 import pl.grzegorziwanek.jumpgame.app.models.gameobjects.Background;
 import pl.grzegorziwanek.jumpgame.app.models.gameobjects.GameObjectContainer;
 import pl.grzegorziwanek.jumpgame.app.models.gameobjects.objects.Player;
+import pl.grzegorziwanek.jumpgame.app.viewmodel.CallbackViewModel;
 
 public class GameModel {
 
     private Context mContext;
+    private CallbackViewModel mCallback;
     private final GamePanel mGamePanel;
     private SessionData mSessionData;
     private SessionThread mSessionThread;
 
-    public GameModel(Context context, GamePanel gamePanel) {
+    public GameModel(Context context, GamePanel gamePanel, CallbackViewModel callback) {
         mContext = context;
-
+        mCallback = callback;
         mGamePanel = gamePanel;
         mGamePanel.setCallback(new Callbacks.PanelCallback() {
             @Override
@@ -46,6 +48,16 @@ public class GameModel {
                                       Player player, ArrayList<GameObjectContainer> otherList) {
                 mGamePanel.draw(background, player, otherList);
             }
+
+            @Override
+            public void onBonusCollected(int bonusCount) {
+                mCallback.onBonusCollected(bonusCount);
+            }
+
+            @Override
+            public void onScoreChanged(int score, int bestScore) {
+                mCallback.onScoreChanged(score, bestScore);
+            }
         });
 
         mSessionThread = new SessionThread(mGamePanel.getHolder(), new Callbacks.ThreadCallback() {
@@ -63,20 +75,22 @@ public class GameModel {
 
     private void startGame() {
         // TODO: 19.04.2017 remove running from session data
+        if (!mSessionThread.isRunning()) {
+            mSessionThread.setRunning(true);
+            mSessionThread.start();
+        }
         mSessionData.setRunning(true);
-        mSessionThread.setRunning(true);
-        mSessionThread.start();
     }
 
     public GamePanel getPanelForBinding() {
         return mGamePanel;
     }
 
-    public String getScore() {
-        return mSessionData.getScore();
+    public void movePlayerUp() {
+        mSessionData.movePlayerUp();
     }
 
-    public String getBestScore() {
-        return mSessionData.getBestScore();
+    public void movePlayerDown() {
+        mSessionData.movePlayerDown();
     }
 }

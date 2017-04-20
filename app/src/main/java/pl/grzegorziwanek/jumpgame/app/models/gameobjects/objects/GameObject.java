@@ -12,6 +12,8 @@ public abstract class GameObject implements Comparable<GameObject> {
     protected int mX;
     protected int mY;
     protected int mDy;
+    protected int mYTopLimit;
+    protected int mYBottomLimit;
     protected int mWidth;
     protected int mHeight;
     protected String mObjectType = "";

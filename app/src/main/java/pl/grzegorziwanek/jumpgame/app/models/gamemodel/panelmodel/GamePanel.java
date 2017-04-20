@@ -37,7 +37,6 @@ public class GamePanel extends SurfaceView implements SurfaceHolder.Callback {
     }
 
     public void lockCanvas() {
-        mCanvas = null;
         mCanvas = getHolder().lockCanvas();
         mCallback.onCanvasLocked();
     }
@@ -45,21 +44,6 @@ public class GamePanel extends SurfaceView implements SurfaceHolder.Callback {
     public void unlockCanvas() {
         getHolder().unlockCanvasAndPost(mCanvas);
         mCallback.onCanvasUnlocked();
-    }
-
-    @Override
-    public void surfaceCreated(SurfaceHolder holder) {
-        System.out.println("surface created");
-    }
-
-    @Override
-    public void surfaceChanged(SurfaceHolder holder, int format, int width, int height) {
-        System.out.println("surface changed");
-    }
-
-    @Override
-    public void surfaceDestroyed(SurfaceHolder holder) {
-        System.out.println("surface destroyed");
     }
 
     @Override
@@ -78,4 +62,13 @@ public class GamePanel extends SurfaceView implements SurfaceHolder.Callback {
             object.draw(mCanvas);
         }
     }
+
+    @Override
+    public void surfaceCreated(SurfaceHolder holder) {}
+
+    @Override
+    public void surfaceChanged(SurfaceHolder holder, int format, int width, int height) {}
+
+    @Override
+    public void surfaceDestroyed(SurfaceHolder holder) {}
 }

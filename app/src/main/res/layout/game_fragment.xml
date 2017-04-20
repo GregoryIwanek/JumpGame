@@ -1,9 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
-<layout xmlns:android="http://schemas.android.com/apk/res/android">
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
     <data>
         <variable
             name="mainGameViewModel"
             type="pl.grzegorziwanek.jumpgame.app.viewmodel.GameViewModel"/>
+        <import type="android.view.View"/>
     </data>
 
     <LinearLayout
@@ -34,7 +36,7 @@
 
                 <ImageView
                     android:id="@+id/cheese1"
-                    android:background="@drawable/x_sign"
+                    android:background="@{mainGameViewModel.bonusNum >= 1 ? @drawable/cheese : @drawable/x_sign}"
                     android:layout_width="30dp"
                     android:layout_height="30dp"/>
                 <Space
@@ -42,7 +44,7 @@
                     android:layout_height="match_parent"/>
                 <ImageView
                     android:id="@+id/cheese2"
-                    android:background="@drawable/x_sign"
+                    android:background="@{mainGameViewModel.bonusNum >= 2 ? @drawable/cheese : @drawable/x_sign}"
                     android:layout_width="30dp"
                     android:layout_height="30dp"/>
                 <Space
@@ -50,7 +52,7 @@
                     android:layout_height="match_parent"/>
                 <ImageView
                     android:id="@+id/cheese3"
-                    android:background="@drawable/x_sign"
+                    android:background="@{mainGameViewModel.bonusNum >= 3 ? @drawable/cheese : @drawable/x_sign}"
                     android:layout_width="30dp"
                     android:layout_height="30dp"/>
                 <Space
@@ -58,7 +60,7 @@
                     android:layout_height="match_parent"/>
                 <ImageView
                     android:id="@+id/cheese4"
-                    android:background="@drawable/x_sign"
+                    android:background="@{mainGameViewModel.bonusNum >= 4 ? @drawable/cheese : @drawable/x_sign}"
                     android:layout_width="30dp"
                     android:layout_height="30dp"/>
                 <Space
@@ -66,7 +68,7 @@
                     android:layout_height="match_parent"/>
                 <ImageView
                     android:id="@+id/cheese5"
-                    android:background="@drawable/x_sign"
+                    android:background="@{mainGameViewModel.bonusNum == 5 ? @drawable/cheese : @drawable/x_sign}"
                     android:layout_width="30dp"
                     android:layout_height="30dp"/>
             </LinearLayout>

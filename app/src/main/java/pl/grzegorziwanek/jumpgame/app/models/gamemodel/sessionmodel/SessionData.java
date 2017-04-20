@@ -2,6 +2,7 @@ package pl.grzegorziwanek.jumpgame.app.models.gamemodel.sessionmodel;
 
 import android.content.Context;
 import android.content.res.Resources;
+import android.databinding.ObservableInt;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Rect;
@@ -57,6 +58,7 @@ public class SessionData {
     private void initVariables() {
         mWidth = mContext.getResources().getDisplayMetrics().widthPixels;
         mHeight = mContext.getResources().getDisplayMetrics().heightPixels;
+        Cons.initScreenSize(mWidth, mHeight);
         mBestScore = 0;
         mBonusCollected = 0;
         sObjectWasAdded = false;
@@ -75,13 +77,18 @@ public class SessionData {
     }
 
     public void update() {
-        mBackground.update();
-        mPlayer.update();
-        updateVariables();
-        updateEnemy();
-        updateBonus();
-        updateObjects();
+        if (isRunning) {
+            mBackground.update();
+            mPlayer.update();
+            updateVariables();
+            updateEnemy();
+            updateBonus();
+            updateObjects();
+        } else {
+            setNewGame();
+        }
         mCallback.onDataUpdated(mBackground, mPlayer, mGameObjects);
+        mCallback.onScoreChanged(mPlayer.getScore(), mBestScore);
     }
 
     private void updateVariables() {
@@ -253,8 +260,7 @@ public class SessionData {
                 switch (mGameObjects.get(i).getObjectType()) {
                     case "ENEMY":
                         mGameObjects.remove(i);
-                        mPlayer.setPlaying(false);
-                        //mSessionThread = null;
+                        isRunning = false;
                         break;
                     case "BONUS_CHEESE":
                         mGameObjects.remove(i);
@@ -278,15 +284,16 @@ public class SessionData {
         if (collidingObject.equals("BONUS_CHEESE")) {
             if(mBonusCollected <5) {
                 mBonusCollected++;
+                mCallback.onBonusCollected(mBonusCollected);
             }
         } else if (collidingObject.equals("BONUS_TRAP")) {
             mBonusCollected -= 2;
             //if is below zero, set GAME OVER
             if (mBonusCollected < 0) {
-                mPlayer.setPlaying(false);
-                //mSessionThread = null;
+                isRunning = false;
                 mBonusCollected = 0;
             }
+            mCallback.onBonusCollected(mBonusCollected);
         }
     }
 
@@ -300,6 +307,8 @@ public class SessionData {
         mBonusStartTime = 0;
         sObjectWasAdded = false;
         mBonusCollected = 0;
+        // TODO: 20.04.2017 add callback with score
+        mCallback.onBonusCollected(mBonusCollected);
     }
 
     public Background getBackground() {
@@ -314,12 +323,12 @@ public class SessionData {
         isRunning = running;
     }
 
-    public String getScore() {
-        return "SCORE " + mPlayer.getScore();
+    public void movePlayerUp() {
+        mPlayer.moveUp();
     }
 
-    public String getBestScore() {
-        return "BEST SCORE " + mBestScore;
+    public void movePlayerDown() {
+        mPlayer.moveDown();
     }
 
 //    public void drawText(Canvas canvas) {
