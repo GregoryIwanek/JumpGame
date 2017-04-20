@@ -12,6 +12,8 @@ public class GameViewModel extends Observable {
 
     private Context mContext;
     private GameModel mGameModel;
+    private String score = "SCORE 0";
+    private String bestScore = "BEST SCORE 0";
 
     public GameViewModel(Context context, GamePanel gamePanel) {
         System.out.println("GameViewModel constructor called");
@@ -33,6 +35,20 @@ public class GameViewModel extends Observable {
 
     public GamePanel getPanelForBinding() {
         return mGameModel.getPanelForBinding();
+    }
+
+    private void fetchGameResults() {
+
+    }
+
+    public String getScore() {
+        System.out.println(mGameModel.getScore());
+        return mGameModel.getScore();
+    }
+
+    public String getBestScore() {
+        System.out.println(mGameModel.getBestScore());
+        return mGameModel.getBestScore();
     }
 }
 

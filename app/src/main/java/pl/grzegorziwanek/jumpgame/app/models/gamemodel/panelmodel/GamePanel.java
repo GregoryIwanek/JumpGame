@@ -12,18 +12,15 @@ import java.util.ArrayList;
 import pl.grzegorziwanek.jumpgame.app.models.gamemodel.Callbacks.PanelCallback;
 import pl.grzegorziwanek.jumpgame.app.models.gameobjects.Background;
 import pl.grzegorziwanek.jumpgame.app.models.gameobjects.GameObjectContainer;
-import pl.grzegorziwanek.jumpgame.app.models.gameobjects.GameObjectService;
 import pl.grzegorziwanek.jumpgame.app.models.gameobjects.objects.Player;
 
 public class GamePanel extends SurfaceView implements SurfaceHolder.Callback {
 
     private PanelCallback mCallback;
     private Canvas mCanvas;
-    private Context mContext;
 
     public GamePanel(Context context) {
         super(context);
-        initVariables(context);
     }
 
     public GamePanel(Context context, AttributeSet attrs) {
@@ -34,9 +31,6 @@ public class GamePanel extends SurfaceView implements SurfaceHolder.Callback {
         super(context, attrs, defStyleAttr);
     }
 
-    private void initVariables(Context context) {
-        mContext = context;
-    }
 
     public void setCallback(PanelCallback callback) {
         mCallback = callback;

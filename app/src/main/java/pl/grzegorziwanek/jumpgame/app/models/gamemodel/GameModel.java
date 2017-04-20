@@ -71,4 +71,12 @@ public class GameModel {
     public GamePanel getPanelForBinding() {
         return mGamePanel;
     }
+
+    public String getScore() {
+        return mSessionData.getScore();
+    }
+
+    public String getBestScore() {
+        return mSessionData.getBestScore();
+    }
 }

@@ -10,6 +10,7 @@ import android.view.ViewGroup;
 
 import pl.grzegorziwanek.jumpgame.app.R;
 import pl.grzegorziwanek.jumpgame.app.databinding.GameFragmentBinding;
+import pl.grzegorziwanek.jumpgame.app.utilis.Cons;
 import pl.grzegorziwanek.jumpgame.app.viewmodel.GameViewModel;
 
 public class GameFragment extends Fragment {
@@ -21,6 +22,7 @@ public class GameFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.game_fragment, container, false);
         initiateBinding();
+        saveScreenSize(view);
         return view;
     }
 
@@ -29,5 +31,9 @@ public class GameFragment extends Fragment {
                 DataBindingUtil.setContentView(this.getActivity(), R.layout.game_fragment);
         mGameViewModel = new GameViewModel(this.getActivity(), gameFragmentBinding.gamePanelContainer);
         gameFragmentBinding.setMainGameViewModel(mGameViewModel);
+    }
+
+    private void saveScreenSize(View view) {
+        Cons.initScreenSize(view.getWidth(), view.getHeight());
     }
 }

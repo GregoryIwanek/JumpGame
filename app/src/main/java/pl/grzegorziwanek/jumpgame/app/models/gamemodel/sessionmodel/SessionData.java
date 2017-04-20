@@ -1,6 +1,7 @@
 package pl.grzegorziwanek.jumpgame.app.models.gamemodel.sessionmodel;
 
 import android.content.Context;
+import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Rect;
@@ -24,6 +25,7 @@ public class SessionData {
 
     private DataCallback mCallback;
     private Context mContext;
+    private Resources mResources;
     private ArrayList<GameObjectContainer> mGameObjects;
     private Bitmap mScaledImage;
     private Background mBackground;
@@ -44,6 +46,7 @@ public class SessionData {
         mContext = context;
         mCallback = callback;
         initData();
+        setNewGame();
     }
 
     private void initData() {
@@ -58,15 +61,16 @@ public class SessionData {
         mBonusCollected = 0;
         sObjectWasAdded = false;
         isRunning = false;
+        mResources = mContext.getResources();
     }
 
     private void initObjects() {
         // background
-        Bitmap backImage = BitmapFactory.decodeResource(mContext.getResources(), R.drawable.floor_background);
+        Bitmap backImage = BitmapFactory.decodeResource(mResources, R.drawable.floor_background);
         mScaledImage = Bitmap.createScaledBitmap(backImage, mWidth, mHeight, true);
         mBackground = new Background(mScaledImage, mWidth);
 
-        mPlayer = new Player(BitmapFactory.decodeResource(mContext.getResources(), R.drawable.mouse_walk), 50, 50, 12);
+        mPlayer = new Player(BitmapFactory.decodeResource(mResources, R.drawable.mouse_walk), 50, 50, 12);
         mGameObjects = new ArrayList<>();
     }
 
@@ -126,19 +130,19 @@ public class SessionData {
 
         if (speed == 5) {
             //picture - cat sitting in one place
-            image = BitmapFactory.decodeResource(mContext.getResources(), R.drawable.cat_sleeping);
+            image = BitmapFactory.decodeResource(mResources, R.drawable.cat_sleeping);
             numFrames = 1;
         } else if (speed < 20) {
             //picture - cat walking slowly
-            image = BitmapFactory.decodeResource(mContext.getResources(), R.drawable.cat_normal_speed);
+            image = BitmapFactory.decodeResource(mResources, R.drawable.cat_normal_speed);
             numFrames = 12;
         } else if (speed < 30) {
             //picture - cat running slowly
-            image = BitmapFactory.decodeResource(mContext.getResources(), R.drawable.cat_slow_run);
+            image = BitmapFactory.decodeResource(mResources, R.drawable.cat_slow_run);
             numFrames = 16;
         } else {
             //picture - fast running cat
-            image = BitmapFactory.decodeResource(mContext.getResources(), R.drawable.cat_sprint_speed);
+            image = BitmapFactory.decodeResource(mResources, R.drawable.cat_sprint_speed);
             numFrames = 13;
         }
 
@@ -175,19 +179,19 @@ public class SessionData {
         int type = mRand.nextInt(2);
         switch (type) {
             case 0:
-                image = BitmapFactory.decodeResource(mContext.getResources(), R.drawable.cheese);
+                image = BitmapFactory.decodeResource(mResources, R.drawable.cheese);
                 yRand = (int) (mRand.nextDouble() * mHeight - (Cons.SPAWNMARGIN + image.getHeight()));
                 objectType = "BONUS_CHEESE";
                 break;
             case 1:
                 //set image to show
-                image = BitmapFactory.decodeResource(mContext.getResources(), R.drawable.mouse_trap);
+                image = BitmapFactory.decodeResource(mResources, R.drawable.mouse_trap);
                 yRand = (int) (mRand.nextDouble() * mHeight - (Cons.SPAWNMARGIN + image.getHeight()));
                 objectType = "BONUS_TRAP";
                 break;
             default:
                 //set image to show
-                image = BitmapFactory.decodeResource(mContext.getResources(), R.drawable.cheese);
+                image = BitmapFactory.decodeResource(mResources, R.drawable.cheese);
                 yRand = (int) (mRand.nextDouble() * mHeight - (Cons.SPAWNMARGIN + image.getHeight()));
                 objectType = "BONUS_CHEESE";
                 break;
@@ -272,7 +276,7 @@ public class SessionData {
 
     private void updateBonusValue(String collidingObject) {
         if (collidingObject.equals("BONUS_CHEESE")) {
-            if(mBonusCollected <3) {
+            if(mBonusCollected <5) {
                 mBonusCollected++;
             }
         } else if (collidingObject.equals("BONUS_TRAP")) {
@@ -296,7 +300,6 @@ public class SessionData {
         mBonusStartTime = 0;
         sObjectWasAdded = false;
         mBonusCollected = 0;
-        mCallback.onDataUpdated(mBackground, mPlayer, mGameObjects);
     }
 
     public Background getBackground() {
@@ -310,4 +313,35 @@ public class SessionData {
     public void setRunning(boolean running) {
         isRunning = running;
     }
+
+    public String getScore() {
+        return "SCORE " + mPlayer.getScore();
+    }
+
+    public String getBestScore() {
+        return "BEST SCORE " + mBestScore;
+    }
+
+//    public void drawText(Canvas canvas) {
+//        Paint paint = new Paint();
+//        paint.setColor(Color.BLACK);
+//        paint.setTextSize(30);
+//        paint.setTypeface(Typeface.create(Typeface.DEFAULT, Typeface.BOLD));
+//
+//        canvas.drawText("SCORE: " + mPlayer.getScore(), 25, sScreenHeight - 25, paint);
+//        canvas.drawText("BEST SCORE: " + mBestScore, sScreenWidth - 325, sScreenHeight-25, paint);
+//    }
+//
+//    public void drawBonusBar(Canvas canvas) {
+//        for (int i=0; i<5; i++) {
+//            Bitmap image;
+//            if (i<mBonusCollected) {
+//                image = BitmapFactory.decodeResource(getResources(), R.drawable.cheese_50x50);
+//            } else {
+//                image = BitmapFactory.decodeResource(getResources(), R.drawable.x_sign);
+//            }
+//
+//            canvas.drawBitmap(image, 25+i*60, 10, null);
+//        }
+//    }
 }
