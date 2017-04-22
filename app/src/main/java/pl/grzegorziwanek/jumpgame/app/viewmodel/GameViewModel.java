@@ -43,6 +43,7 @@ public class GameViewModel extends BaseObservable {
 
             @Override
             public void onScoreChanged(int score, int bestScore) {
+                
                 mScore.set(score);
                 mBestScore.set(bestScore);
                 notifyPropertyChanged(BR.score);
