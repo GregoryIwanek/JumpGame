@@ -4,25 +4,36 @@ import android.content.Context;
 import android.databinding.BaseObservable;
 import android.databinding.Bindable;
 import android.databinding.ObservableInt;
+import android.media.AudioAttributes;
+import android.media.SoundPool;
+import android.os.Build;
+import android.support.annotation.RequiresApi;
 import android.view.View;
 
 import pl.grzegorziwanek.jumpgame.app.BR;
+import pl.grzegorziwanek.jumpgame.app.R;
 import pl.grzegorziwanek.jumpgame.app.models.gamemodel.GameModel;
 import pl.grzegorziwanek.jumpgame.app.models.gamemodel.panelmodel.GamePanel;
 
 public class GameViewModel extends BaseObservable {
 
+    private SoundPool soundPoolBackground;
+    private SoundPool soundPoolCollision;
+    private AudioAttributes attributes;
     private Context mContext;
     private GameModel mGameModel;
-    @Bindable
-    private ObservableInt mBonusNum = new ObservableInt(0);
-    @Bindable
-    private ObservableInt mScore = new ObservableInt(0);
-    @Bindable
-    ObservableInt mBestScore = new ObservableInt(0);
+    @Bindable private ObservableInt mBonusNum = new ObservableInt(0);
+    @Bindable private ObservableInt mScore = new ObservableInt(0);
+    @Bindable private ObservableInt mBestScore = new ObservableInt(0);
 
+    @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
     public GameViewModel(Context context, GamePanel gamePanel) {
         mContext = context;
+        attributes = new AudioAttributes.Builder()
+                .setUsage(AudioAttributes.USAGE_GAME)
+                .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
+                .build();
+        setSoundPools();
         mGameModel = new GameModel(context, gamePanel, new CallbackViewModel() {
             @Override
             public void onBonusCollected(int bonusCount) {
@@ -40,22 +51,43 @@ public class GameViewModel extends BaseObservable {
         });
     }
 
-    public void onItemClick(View view) {
+    @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
+    private void setSoundPools() {
+        soundPoolBackground = new SoundPool.Builder().
+                setAudioAttributes(attributes)
+                .build();
+        soundPoolBackground.setOnLoadCompleteListener(new SoundPool.OnLoadCompleteListener() {
+            @Override
+            public void onLoadComplete(SoundPool soundPool, int sampleId, int status) {
+                soundPool.play(sampleId, 0.5f, 0.5f, 1, -1, 1f);
+            }
+        });
+        soundPoolCollision = new SoundPool.Builder().
+                setAudioAttributes(attributes)
+                .build();
+        soundPoolCollision.setOnLoadCompleteListener(new SoundPool.OnLoadCompleteListener() {
+            @Override
+            public void onLoadComplete(SoundPool soundPool, int sampleId, int status) {
+                soundPool.play(sampleId, 0.5f, 0.5f, 1, -1, 1f);
+            }
+        });
     }
 
     public void onButtonAttackClick(View view) {
+        soundPoolBackground.load(mContext, R.raw.pim_poy_quiet, 1);
+
+//        MediaPlayer player = MediaPlayer.create(mContext, R.raw.pim_poy_quiet);
+//        player.start();
     }
 
     public void onButtonUpClick(View view) {
         mGameModel.movePlayerUp();
+        soundPoolCollision.load(mContext, R.raw.mouse_trap_sound, 1);
     }
 
     public void onButtonDownClick(View view) {
+        soundPoolCollision.load(mContext, R.raw.cat_hissing_sound, 1);
         mGameModel.movePlayerDown();
-    }
-
-    public GamePanel getPanelForBinding() {
-        return mGameModel.getPanelForBinding();
     }
 
     private void fetchGameResults() {
@@ -77,23 +109,3 @@ public class GameViewModel extends BaseObservable {
         return mBonusNum.get();
     }
 }
-
-//    @OnClick({R.id.button_attack, R.id.button_up, R.id.button_down})
-//    public void onButtonAttackClick(View view) {
-//        int tag = (int) view.getTag();
-//        switch (tag) {
-//            case R.drawable.button_attack:
-//                System.out.println("attack");
-//                break;
-//            case R.drawable.button_up:
-//                System.out.println("up");
-//                int y = mGamePanel.mPlayer.getY();
-//                mGamePanel.mPlayer.setY(y - 50);
-//                break;
-//            case R.drawable.button_down:
-//                System.out.println("down");
-//                int yDown = mGamePanel.mPlayer.getY();
-//                mGamePanel.mPlayer.setY(yDown + 50);
-//                break;
-//        }
-//    }
