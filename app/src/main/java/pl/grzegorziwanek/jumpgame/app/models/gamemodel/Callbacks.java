@@ -20,7 +20,9 @@ public interface Callbacks {
         void onDataUpdated(Background background, Player player,
                            ArrayList<GameObjectContainer> list);
 
-        void onBonusCollected(int bonusCount);
+        void onBonusCollected(int bonusCount, String type);
+
+        void onEnemyCollision();
 
         void onScoreChanged(int score, int bestScore);
     }

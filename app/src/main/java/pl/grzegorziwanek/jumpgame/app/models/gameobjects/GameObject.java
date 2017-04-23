@@ -1,4 +1,4 @@
-package pl.grzegorziwanek.jumpgame.app.models.gameobjects.objects;
+package pl.grzegorziwanek.jumpgame.app.models.gameobjects;
 
 import android.graphics.Rect;
 
@@ -17,6 +17,7 @@ public abstract class GameObject implements Comparable<GameObject> {
     protected int mWidth;
     protected int mHeight;
     protected String mObjectType = "";
+    protected String mObjectSubtype = "";
 
     @Override
     public int compareTo(GameObject compared) {
@@ -75,5 +76,13 @@ public abstract class GameObject implements Comparable<GameObject> {
 
     public String getObjectType() {
         return mObjectType;
+    }
+
+    public void setObjectSubtype (String subtype) {
+        mObjectSubtype = subtype;
+    }
+
+    public String getObjectSubtype() {
+        return mObjectSubtype;
     }
 }

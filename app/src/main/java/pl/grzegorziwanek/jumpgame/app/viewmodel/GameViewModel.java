@@ -5,6 +5,7 @@ import android.databinding.BaseObservable;
 import android.databinding.Bindable;
 import android.databinding.ObservableInt;
 import android.media.AudioAttributes;
+import android.media.AudioManager;
 import android.media.SoundPool;
 import android.os.Build;
 import android.support.annotation.RequiresApi;
@@ -26,68 +27,98 @@ public class GameViewModel extends BaseObservable {
     @Bindable private ObservableInt mScore = new ObservableInt(0);
     @Bindable private ObservableInt mBestScore = new ObservableInt(0);
 
-    @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
+
     public GameViewModel(Context context, GamePanel gamePanel) {
         mContext = context;
-        attributes = new AudioAttributes.Builder()
-                .setUsage(AudioAttributes.USAGE_GAME)
-                .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
-                .build();
         setSoundPools();
+        setGameModel(context, gamePanel);
+    }
+
+    private void setGameModel(Context context, GamePanel gamePanel) {
         mGameModel = new GameModel(context, gamePanel, new CallbackViewModel() {
             @Override
-            public void onBonusCollected(int bonusCount) {
+            public void onEnemyCollision() {
+                playSound("ENEMY");
+            }
+
+            @Override
+            public void onBonusCollected(int bonusCount, String type) {
                 mBonusNum.set(bonusCount);
+                playSound(type);
                 notifyChange();
             }
 
             @Override
             public void onScoreChanged(int score, int bestScore) {
-                
                 mScore.set(score);
                 mBestScore.set(bestScore);
                 notifyPropertyChanged(BR.score);
                 notifyPropertyChanged(BR.bestScore);
             }
+
+            @Override
+            public void onGameStart() {
+                soundPoolBackground.load(mContext, R.raw.pim_poy_quiet, 1);
+            }
+
+            @Override
+            public void onGameStop() {
+
+            }
         });
     }
 
-    @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
     private void setSoundPools() {
-        soundPoolBackground = new SoundPool.Builder().
-                setAudioAttributes(attributes)
-                .build();
-        soundPoolBackground.setOnLoadCompleteListener(new SoundPool.OnLoadCompleteListener() {
-            @Override
-            public void onLoadComplete(SoundPool soundPool, int sampleId, int status) {
-                soundPool.play(sampleId, 0.5f, 0.5f, 1, -1, 1f);
-            }
-        });
-        soundPoolCollision = new SoundPool.Builder().
-                setAudioAttributes(attributes)
-                .build();
-        soundPoolCollision.setOnLoadCompleteListener(new SoundPool.OnLoadCompleteListener() {
-            @Override
-            public void onLoadComplete(SoundPool soundPool, int sampleId, int status) {
-                soundPool.play(sampleId, 0.5f, 0.5f, 1, -1, 1f);
-            }
-        });
+        // AudioAttributes.Builder() requires API >=  21
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            attributes = new AudioAttributes.Builder()
+                    .setUsage(AudioAttributes.USAGE_GAME)
+                    .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
+                    .build();
+            soundPoolBackground = new SoundPool.Builder().
+                    setAudioAttributes(attributes)
+                    .build();
+            soundPoolCollision = new SoundPool.Builder().
+                    setAudioAttributes(attributes)
+                    .build();
+        } else {
+            soundPoolBackground = new SoundPool(1, AudioManager.STREAM_MUSIC, 0);
+            soundPoolCollision = new SoundPool(5, AudioManager.STREAM_MUSIC, 0);
+        }
+
+        soundPoolBackground.setOnLoadCompleteListener(
+                (soundPool, sampleId, status) -> soundPool.play(sampleId, 0.5f, 0.5f, 1, -1, 1f)
+        );
+        soundPoolCollision.setOnLoadCompleteListener(
+                (soundPool, sampleId, status) -> soundPool.play(sampleId, 0.5f, 0.5f, 1, 0, 1f)
+        );
+    }
+
+    private void playSound(String type) {
+        switch (type) {
+            case "CHEESE":
+                soundPoolCollision.load(mContext, R.raw.point_collected, 1);
+                break;
+            case "TRAP":
+                soundPoolCollision.load(mContext, R.raw.mouse_trap_sound, 1);
+                break;
+            case "ENEMY":
+                soundPoolCollision.load(mContext, R.raw.cat_angry, 1);
+                break;
+            case "RESET":
+                break;
+        }
     }
 
     public void onButtonAttackClick(View view) {
         soundPoolBackground.load(mContext, R.raw.pim_poy_quiet, 1);
-
-//        MediaPlayer player = MediaPlayer.create(mContext, R.raw.pim_poy_quiet);
-//        player.start();
     }
 
     public void onButtonUpClick(View view) {
         mGameModel.movePlayerUp();
-        soundPoolCollision.load(mContext, R.raw.mouse_trap_sound, 1);
     }
 
     public void onButtonDownClick(View view) {
-        soundPoolCollision.load(mContext, R.raw.cat_hissing_sound, 1);
         mGameModel.movePlayerDown();
     }
 

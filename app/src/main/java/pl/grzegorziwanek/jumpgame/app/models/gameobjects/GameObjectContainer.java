@@ -39,4 +39,9 @@ public class GameObjectContainer implements GameObjectService {
     public String getObjectType() {
         return mGameObjectService.getObjectType();
     }
+
+    @Override
+    public String getObjectSubtype() {
+        return mGameObjectService.getObjectSubtype();
+    }
 }

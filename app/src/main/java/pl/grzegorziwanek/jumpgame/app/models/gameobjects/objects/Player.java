@@ -1,13 +1,10 @@
 package pl.grzegorziwanek.jumpgame.app.models.gameobjects.objects;
 
-import android.databinding.Bindable;
-import android.databinding.ObservableInt;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Rect;
 
-import pl.grzegorziwanek.jumpgame.app.BR;
-import pl.grzegorziwanek.jumpgame.app.view.GamePanelOld;
+import pl.grzegorziwanek.jumpgame.app.models.gameobjects.GameObject;
 import pl.grzegorziwanek.jumpgame.app.utilis.CustomAnimation;
 import pl.grzegorziwanek.jumpgame.app.models.gameobjects.GameObjectService;
 import pl.grzegorziwanek.jumpgame.app.utilis.Cons;
@@ -25,6 +22,7 @@ public class Player extends GameObject implements GameObjectService {
     private long mStartTime; //used for change frames pictures
 
     public Player(Bitmap res, int width, int height, int numFrames) {
+        System.out.println("called Player constructor: width " + width );
         //define basic data
         setVariables(width, height);
         //set animation information
@@ -38,7 +36,7 @@ public class Player extends GameObject implements GameObjectService {
 
         //set starting position
         mX = Cons.STARTPOSITION;
-        mY = GamePanelOld.sScreenHeight/2;
+        mY = Cons.sScreenHeight/2;
 
         //set score and Y axis speed
         mScore = 0;
@@ -147,6 +145,15 @@ public class Player extends GameObject implements GameObjectService {
 
     public void resetScore() {
         mScore = 0;
+    }
+
+    // TODO: 23.04.2017 clean code, refactor that method
+    public void reset() {
+        resetScore();
+        resetDY();
+        setPlaying(false);
+        mYBottomLimit = mY;
+        mYTopLimit = mY;
     }
 
     public int getScore() {

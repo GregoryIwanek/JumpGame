@@ -2,24 +2,23 @@ package pl.grzegorziwanek.jumpgame.app.models.gamemodel.sessionmodel;
 
 import android.content.Context;
 import android.content.res.Resources;
-import android.databinding.ObservableInt;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Rect;
+import android.os.Bundle;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.Random;
 
 import pl.grzegorziwanek.jumpgame.app.R;
 import pl.grzegorziwanek.jumpgame.app.models.gamemodel.Callbacks.DataCallback;
 import pl.grzegorziwanek.jumpgame.app.models.gameobjects.Background;
+import pl.grzegorziwanek.jumpgame.app.models.gameobjects.GameObject;
 import pl.grzegorziwanek.jumpgame.app.models.gameobjects.GameObjectContainer;
 import pl.grzegorziwanek.jumpgame.app.models.gameobjects.objects.Enemy;
-import pl.grzegorziwanek.jumpgame.app.models.gameobjects.objects.GameObject;
 import pl.grzegorziwanek.jumpgame.app.models.gameobjects.objects.Player;
-import pl.grzegorziwanek.jumpgame.app.models.gameobjects.objects.bonus.Bonus;
+import pl.grzegorziwanek.jumpgame.app.models.objectfactory.ObjectFactory;
 import pl.grzegorziwanek.jumpgame.app.utilis.Cons;
 
 public class SessionData {
@@ -72,7 +71,7 @@ public class SessionData {
         mScaledImage = Bitmap.createScaledBitmap(backImage, mWidth, mHeight, true);
         mBackground = new Background(mScaledImage, mWidth);
 
-        mPlayer = new Player(BitmapFactory.decodeResource(mResources, R.drawable.mouse_walk), 50, 50, 12);
+        mPlayer = (Player) ObjectFactory.getUnwrappedObject(generatePlayerData(), mContext);
         mGameObjects = new ArrayList<>();
     }
 
@@ -178,29 +177,35 @@ public class SessionData {
     }
 
     private void spawnBonus() {
-        //set random bonus (cheese, trap etc) and random position
-        Bitmap image;
-        String objectType;
+        String subtype;
+        int height;
+        int width;
+        int resId;
         int yRand;
+        int x = mWidth+30;
 
-        int type = mRand.nextInt(2);
-        switch (type) {
+        int randomType = mRand.nextInt(2);
+        switch (randomType) {
             case 0:
-                image = BitmapFactory.decodeResource(mResources, R.drawable.cheese);
-                yRand = (int) (mRand.nextDouble() * mHeight - (Cons.SPAWNMARGIN + image.getHeight()));
-                objectType = "BONUS_CHEESE";
+                resId = R.drawable.cheese;
+                yRand = (int) (mRand.nextDouble() * mHeight - (Cons.SPAWNMARGIN + 50));
+                width = 75;
+                height = 50;
+                subtype = "CHEESE";
                 break;
             case 1:
-                //set image to show
-                image = BitmapFactory.decodeResource(mResources, R.drawable.mouse_trap);
-                yRand = (int) (mRand.nextDouble() * mHeight - (Cons.SPAWNMARGIN + image.getHeight()));
-                objectType = "BONUS_TRAP";
+                resId = R.drawable.mouse_trap;
+                yRand = (int) (mRand.nextDouble() * mHeight - (Cons.SPAWNMARGIN + 50));
+                width = 50;
+                height = 50;
+                subtype = "TRAP";
                 break;
             default:
-                //set image to show
-                image = BitmapFactory.decodeResource(mResources, R.drawable.cheese);
-                yRand = (int) (mRand.nextDouble() * mHeight - (Cons.SPAWNMARGIN + image.getHeight()));
-                objectType = "BONUS_CHEESE";
+                resId = R.drawable.cheese;
+                yRand = (int) (mRand.nextDouble() * mHeight - (Cons.SPAWNMARGIN + 50));
+                width = 75;
+                height = 50;
+                subtype = "CHEESE";
                 break;
         }
 
@@ -209,12 +214,11 @@ public class SessionData {
             yRand = Cons.SPAWNMARGIN;
         }
 
-        //set size of object depending on size of image
-        int height = image.getHeight();
-        int width = image.getWidth();
 
         //add object to container list
-        mGameObjects.add(new GameObjectContainer(new Bonus(image, mWidth+30, yRand, width, height, Cons.MOVESPEED, objectType)));
+        mGameObjects.add(ObjectFactory.getWrappedObject(
+                generateBonusData(subtype, resId, x, yRand, width, height, Cons.MOVESPEED),
+                mContext));
 
         //reset timer
         mBonusStartTime = System.nanoTime();
@@ -234,11 +238,8 @@ public class SessionData {
     }
 
     private void sortObjectsByY() {
-        Collections.sort(mGameObjects, new Comparator<GameObjectContainer>() {
-            public int compare (GameObjectContainer object1, GameObjectContainer object2) {
-                return object1.comparePosition() - object2.comparePosition();
-            }
-        });
+        Collections.sort(mGameObjects,
+                (object1, object2) -> object1.comparePosition() - object2.comparePosition());
     }
 
     private boolean collision(GameObjectContainer object1, GameObject object2) {
@@ -260,17 +261,21 @@ public class SessionData {
                 switch (mGameObjects.get(i).getObjectType()) {
                     case "ENEMY":
                         mGameObjects.remove(i);
+                        mCallback.onEnemyCollision();
                         isRunning = false;
                         break;
-                    case "BONUS_CHEESE":
-                        mGameObjects.remove(i);
-                        updateBonusValue("BONUS_CHEESE");
-                        mPlayer.addExtraScore(25);
-                        break;
-                    case "BONUS_TRAP":
-                        mGameObjects.remove(i);
-                        updateBonusValue("BONUS_TRAP");
-                        mPlayer.addExtraScore(-50);
+                    case "BONUS":
+                        // TODO: 23.04.2017 refactor that part (split subtypes of bonuses)
+                        System.out.println("CHECK COLLISION: " + mGameObjects.get(i).getObjectSubtype());
+                        if (mGameObjects.get(i).getObjectSubtype().equals("CHEESE")) {
+                            mGameObjects.remove(i);
+                            updateBonusValue("CHEESE");
+                            mPlayer.addExtraScore(25);
+                        } else if (mGameObjects.get(i).getObjectSubtype().equals("TRAP")) {
+                            mGameObjects.remove(i);
+                            updateBonusValue("TRAP");
+                            mPlayer.addExtraScore(-50);
+                        }
                         break;
                     default:
                         System.out.println("ERROR OF OBJECT TYPE OCCUR: UNDEFINED TYPE OF OBJECT COLLIDING WITH PLAYER");
@@ -281,34 +286,65 @@ public class SessionData {
     }
 
     private void updateBonusValue(String collidingObject) {
-        if (collidingObject.equals("BONUS_CHEESE")) {
+        if (collidingObject.equals("CHEESE")) {
             if(mBonusCollected <5) {
                 mBonusCollected++;
-                mCallback.onBonusCollected(mBonusCollected);
             }
-        } else if (collidingObject.equals("BONUS_TRAP")) {
+            mCallback.onBonusCollected(mBonusCollected, "CHEESE");
+        } else if (collidingObject.equals("TRAP")) {
             mBonusCollected -= 2;
             //if is below zero, set GAME OVER
             if (mBonusCollected < 0) {
                 isRunning = false;
                 mBonusCollected = 0;
             }
-            mCallback.onBonusCollected(mBonusCollected);
+            mCallback.onBonusCollected(mBonusCollected, "TRAP");
         }
+    }
+
+    private Bundle generatePlayerData() {
+        Bundle b = new Bundle();
+        b.putString("TYPE", "PLAYER");
+        b.putInt("ID", R.drawable.mouse_walk);
+        b.putInt("WIDTH", 50);
+        b.putInt("HEIGHT", 50);
+        b.putInt("FRAMES", 12);
+        return b;
+    }
+
+    private Bundle generateEnemeyData() {
+        Bundle b = new Bundle();
+        b.putString("TYPE", "PLAYER");
+        b.putInt("ID", R.drawable.mouse_walk);
+        b.putInt("WIDTH", 50);
+        b.putInt("HEIGHT", 50);
+        b.putInt("FRAMES", 12);
+        return b;
+    }
+
+    private Bundle generateBonusData(String subtype,int resId, int x, int y, int width, int height, int speed) {
+        Bundle b = new Bundle();
+        b.putString("TYPE", "BONUS");
+        b.putString("SUBTYPE", subtype);
+        b.putInt("ID", resId);
+        b.putInt("X", x);
+        b.putInt("Y", y);
+        b.putInt("WIDTH", width);
+        b.putInt("HEIGHT", height);
+        b.putInt("SPEED", speed);
+        return b;
     }
 
     public void setNewGame() {
         mGameObjects.clear();
-        mPlayer.resetScore();
-        mPlayer.resetDY();
         mPlayer.setY(mHeight/2);
-        mPlayer.setPlaying(false);
+        mPlayer.reset();
         mEnemyStartTime = 0;
         mBonusStartTime = 0;
         sObjectWasAdded = false;
         mBonusCollected = 0;
         // TODO: 20.04.2017 add callback with score
-        mCallback.onBonusCollected(mBonusCollected);
+        mCallback.onBonusCollected(mBonusCollected, "RESET");
     }
 
     public Background getBackground() {

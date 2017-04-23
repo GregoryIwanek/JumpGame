@@ -3,7 +3,7 @@ package pl.grzegorziwanek.jumpgame.app.models.gameobjects.objects.bonus;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 
-import pl.grzegorziwanek.jumpgame.app.models.gameobjects.objects.GameObject;
+import pl.grzegorziwanek.jumpgame.app.models.gameobjects.GameObject;
 import pl.grzegorziwanek.jumpgame.app.models.gameobjects.GameObjectService;
 
 /**
@@ -15,14 +15,16 @@ public class Bonus extends GameObject implements GameObjectService {
     private int mSpeed;
     private Bitmap mImage;
 
-    public Bonus(Bitmap res, int x, int y, int width, int height, int speed, String type) {
+    public Bonus(Bitmap res, int x, int y, int width, int height, int speed, String type, String subtype) {
         mImage = res;
         mX = x;
         mY = y;
         mWidth = width;
         mHeight = height;
         mSpeed = speed;
+        // TODO: 23.04.2017 remove conflict between subtype and type
         mObjectType = type;
+        mObjectSubtype = subtype;
     }
 
     @Override

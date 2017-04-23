@@ -3,6 +3,7 @@ package pl.grzegorziwanek.jumpgame.app.models.gameobjects.objects;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 
+import pl.grzegorziwanek.jumpgame.app.models.gameobjects.GameObject;
 import pl.grzegorziwanek.jumpgame.app.utilis.CustomAnimation;
 import pl.grzegorziwanek.jumpgame.app.models.gameobjects.GameObjectService;
 
@@ -10,8 +11,6 @@ public class Enemy extends GameObject implements GameObjectService {
     private int mSpeed;
     private CustomAnimation mAnimation = new CustomAnimation();
     private Bitmap mFramesheet;
-
-    private String mTypeOfObject = "enemy";
 
     public Enemy(Bitmap res, int x, int y, int width, int height, int speed, int numFrames, String type) {
         mObjectType = type;

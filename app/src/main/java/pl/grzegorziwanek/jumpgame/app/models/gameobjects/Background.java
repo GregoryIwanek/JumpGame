@@ -2,10 +2,9 @@ package pl.grzegorziwanek.jumpgame.app.models.gameobjects;
 
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
-import android.graphics.Rect;
 
-import pl.grzegorziwanek.jumpgame.app.models.gameobjects.objects.GameObject;
-import pl.grzegorziwanek.jumpgame.app.view.GamePanelOld;
+import pl.grzegorziwanek.jumpgame.app.utilis.Cons;
+
 
 /**
  * Created by Grzegorz Iwanek on 25.08.2016.
@@ -23,7 +22,7 @@ public class Background {
     public Background(Bitmap image, int screenWidth) {
         this.image = image;
         mScreenWidth = screenWidth;
-        this.dx = GamePanelOld.MOVESPEED;
+        this.dx = Cons.MOVESPEED;
     }
 
     public void update() {
