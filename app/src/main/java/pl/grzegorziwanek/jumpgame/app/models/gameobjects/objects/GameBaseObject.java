@@ -1,6 +1,7 @@
-package pl.grzegorziwanek.jumpgame.app.models.gameobjects;
+package pl.grzegorziwanek.jumpgame.app.models.gameobjects.objects;
 
 import android.graphics.Rect;
+import android.support.annotation.NonNull;
 
 /**
  * Created by Grzegorz Iwanek on 25.08.2016.
@@ -8,19 +9,28 @@ import android.graphics.Rect;
  * Class implements Comparable ( for sake positioning elements on the list depending by Y value->
  * they need to be drawn in correct order, objects with bigger Y value: in foreground, objects closer to 0 axis: in background);
  */
-public abstract class GameObject implements Comparable<GameObject> {
+public abstract class GameBaseObject implements Comparable<GameBaseObject> {
     protected int mX;
     protected int mY;
     protected int mDy;
-    protected int mYTopLimit;
-    protected int mYBottomLimit;
     protected int mWidth;
     protected int mHeight;
+    protected int mSpeed;
     protected String mObjectType = "";
     protected String mObjectSubtype = "";
 
+    protected GameBaseObject(ObjectParameters p) {
+        mX = p.getX();
+        mY = p.getY();
+        mWidth = p.getWidth();
+        mHeight = p.getHeight();
+        mSpeed = p.getSpeed();
+        mObjectType = p.getType();
+        mObjectSubtype = p.getSubType();
+    }
+
     @Override
-    public int compareTo(GameObject compared) {
+    public int compareTo(@NonNull GameBaseObject compared) {
         if (comparePosition() > compared.comparePosition()) {
             return 1;
         } else if (comparePosition() < compared.comparePosition()) {
@@ -30,33 +40,11 @@ public abstract class GameObject implements Comparable<GameObject> {
         }
     }
 
-    //setters
-    public void setX(int x) {
-        mX = x;
-    }
-
-    public void setY(int y) {
-        mY = y;
-    }
-
-    //getters
     public int getX() {
         return mX;
     }
 
-    public int getY() {
-        return mY;
-    }
-
-    public int getWidth() {
-        return mWidth;
-    }
-
-    public int getHeight() {
-        return mHeight;
-    }
-
-    public int comparePosition() {
+    protected int comparePosition() {
         return (mY + mHeight);
     }
 
@@ -70,16 +58,8 @@ public abstract class GameObject implements Comparable<GameObject> {
                 (int)(mY + 0.9*mHeight));
     }
 
-    public void setObjectType(String type) {
-        mObjectType = type;
-    }
-
     public String getObjectType() {
         return mObjectType;
-    }
-
-    public void setObjectSubtype (String subtype) {
-        mObjectSubtype = subtype;
     }
 
     public String getObjectSubtype() {

@@ -3,60 +3,62 @@ package pl.grzegorziwanek.jumpgame.app.utilis;
 import android.graphics.Bitmap;
 import android.view.animation.Animation;
 
+import pl.grzegorziwanek.jumpgame.app.models.gameobjects.objects.ObjectParameters;
+
 /**
  * Created by Grzegorz Iwanek on 25.08.2016.
  * Contains class which extends Animation. Responsible for making animation from given source .pgn file with series of drawings.
- * Can be played once, or in constant loop (mPlayedOnce).
+ * Is played in a loop with specific intervals.
  */
 public class CustomAnimation extends Animation {
-    private Bitmap[] mFrames; //array with every single frame of an animation (.png source file)
+
+    private Bitmap[] mFrames;
     private int mCurrentFrame;
     private long mStartTime;
-    private long mDelay; //used as time between showing next frame
-    private boolean mPlayedOnce = false; //used to determine if animation was completed (at least one time)
+    private long mFramesInterval;
 
-    public void setFrames(Bitmap[] frames) {
-        //assign frames to show
-        mFrames = frames;
-        mCurrentFrame = 0;
+    public CustomAnimation(ObjectParameters p) {
+        Bitmap imageRes = p.getImageRes();
+        int numFrames = p.getNumFrames();
+        int width = p.getWidth();
+        int height = p.getHeight();
+
+        setAnimationFrames(imageRes, numFrames, width, height);
         mStartTime = System.nanoTime();
+        mFramesInterval = p.getFramesInterval();
     }
 
-    public void setDelay(int delay) {
-        mDelay = delay;
-    }
-
-    public void setFrame(int currentFrame) {
-        mCurrentFrame = currentFrame;
+    private void setAnimationFrames(Bitmap imageRes, int numFrames, int width, int height) {
+        mCurrentFrame = 0;
+        mFrames = new Bitmap[numFrames];
+        for (int i=0; i<mFrames.length; i++) {
+            // x=0, because animation is set of images group vertically
+            // every next image is a i*width ( X/Y axis are switched)
+            mFrames[i] = Bitmap.createBitmap(imageRes, i*width, 0, width, height);
+        }
     }
 
     public void update() {
-        //get time passed since last frame was draw
-        long mElapsed = (System.nanoTime() - mStartTime) / 1000000;
-
-        //increment if delay was passed
-        if(mElapsed > mDelay) {
+        if(isPastFramesInterval()) {
             mCurrentFrame++;
             mStartTime = System.nanoTime();
         }
-
-        //if all frames were shown, reset count and set loop has been completed (at least once)
-        if (mCurrentFrame == mFrames.length) {
+        if (isLoopFinished()) {
             mCurrentFrame = 0;
-            mPlayedOnce = true;
         }
+    }
+
+    private boolean isPastFramesInterval() {
+        long mElapsed = (System.nanoTime() - mStartTime) / 1000000;
+        return mElapsed > mFramesInterval;
+    }
+
+    private boolean isLoopFinished() {
+        return mCurrentFrame == mFrames.length;
     }
 
     //get frame to draw on canvas
     public Bitmap getImage() {
         return mFrames[mCurrentFrame];
-    }
-
-    public int getCurrentFrame() {
-        return mCurrentFrame;
-    }
-
-    public boolean getPlayedOnce() {
-        return mPlayedOnce;
     }
 }

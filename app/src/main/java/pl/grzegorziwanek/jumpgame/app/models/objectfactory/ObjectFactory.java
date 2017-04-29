@@ -1,20 +1,17 @@
 package pl.grzegorziwanek.jumpgame.app.models.objectfactory;
 
-import android.content.Context;
-import android.content.res.Resources;
-import android.graphics.BitmapFactory;
-import android.os.Bundle;
-
-import pl.grzegorziwanek.jumpgame.app.models.gameobjects.GameObject;
 import pl.grzegorziwanek.jumpgame.app.models.gameobjects.GameObjectContainer;
 import pl.grzegorziwanek.jumpgame.app.models.gameobjects.GameObjectService;
-import pl.grzegorziwanek.jumpgame.app.models.gameobjects.objects.Enemy;
-import pl.grzegorziwanek.jumpgame.app.models.gameobjects.objects.Player;
+import pl.grzegorziwanek.jumpgame.app.models.gameobjects.objects.GameBaseObject;
+import pl.grzegorziwanek.jumpgame.app.models.gameobjects.objects.ObjectParameters;
 import pl.grzegorziwanek.jumpgame.app.models.gameobjects.objects.bonus.Bonus;
+import pl.grzegorziwanek.jumpgame.app.models.gameobjects.objects.bonus.Enemy;
+import pl.grzegorziwanek.jumpgame.app.models.gameobjects.objects.bonus.Player;
 
 public abstract class ObjectFactory {
+    // TODO: 29.04.2017 edit description ( method has been changed)
     /**
-     * @param objectData Bundle with data about created object. Call only for: ENEMY, BONUS
+     * Bundle with data about created object. Call only for: ENEMY, BONUS;
      *                      KEY         VALUE
      *                  1.  TYPE        String, type of the object ( PLAYER, ENEMY, BONUS)
      *                  2.  SUBTYPE     String, subtype of the object ( BONUS -> CHEESE, TRAP, BALL)
@@ -25,12 +22,13 @@ public abstract class ObjectFactory {
      *
      * @return  returns object, wrapped by {@link GameObjectContainer}
      */
-    public static GameObjectContainer getWrappedObject(Bundle objectData, Context context) {
-        return new GameObjectContainer(getObject(objectData, context));
+    public static GameObjectContainer getWrappedObject(ObjectParameters parameters) {
+        return new GameObjectContainer(getObject(parameters));
     }
 
+    // TODO: 29.04.2017 edit description ( method has been changed)
     /**
-     * @param objectData Bundle with data about created object. Call only for: PLAYER
+     *  Bundle with data about created object. Call only for: PLAYER;
      *                      KEY         VALUE
      *                  1.  TYPE        String, type of the object ( PLAYER, ENEMY, BONUS)
      *                  2.  SUBTYPE     String, subtype of the object ( BONUS -> CHEESE, TRAP, BALL)
@@ -40,61 +38,39 @@ public abstract class ObjectFactory {
      *                  6.  FRAMES      int, number of the frames ( in case of animation)
      *
      * @return returns {@link GameObjectService} object type, without wrapped {@link GameObjectContainer};
-     * upon initiation, has to be cast to proper {@link GameObject} children class ( all children classes
+     * upon initiation, has to be cast to proper {@link GameBaseObject} children class ( all children classes
      * implement {@link GameObjectService});
      * e.g Player player = (Player) ObjectFactory.getUnwrappedObject(objectData);
      */
-    public static GameObjectService getUnwrappedObject(Bundle objectData, Context context) {
-        return getObject(objectData, context);
+    public static GameObjectService getUnwrappedObject(ObjectParameters parameters) {
+        return getObject(parameters);
     }
 
-    private static GameObjectService getObject(Bundle objectData, Context context) {
-        switch (objectData.getString("TYPE")) {
+    private static GameObjectService getObject(ObjectParameters parameters) {
+        switch (parameters.getType()) {
             case "PLAYER":
-                return generatePlayer(objectData, context);
+                return generatePlayer(parameters);
             case "ENEMY":
-                return generateEnemy(objectData, context);
+                return generateEnemy(parameters);
             case "BONUS":
-                return generateBonus(objectData, context);
+                return generateBonus(parameters);
             default:
-                return generateEnemy(objectData, context);
+                return generateEnemy(parameters);
         }
     }
 
-    private static Player generatePlayer(Bundle b, Context context) {
-        return new Player(BitmapFactory.decodeResource(
-                context.getResources(),
-                b.getInt("ID")),
-                b.getInt("WIDTH"),
-                b.getInt("HEIGHT"),
-                b.getInt("FRAMES"));
+    private static Player generatePlayer(ObjectParameters parameters) {
+        parameters.setFramesInterval(10);
+        return new Player(parameters);
     }
 
-    private static Enemy generateEnemy(Bundle b, Context context) {
-        return new Enemy(BitmapFactory.decodeResource(
-                context.getResources(),
-                b.getInt("ID")),
-                b.getInt("X"),
-                b.getInt("Y"),
-                b.getInt("WIDTH"),
-                b.getInt("HEIGHT"),
-                b.getInt("SPEED"),
-                b.getInt("FRAMES"),
-                b.getString("SUBTYPE")
-        );
+    private static Enemy generateEnemy(ObjectParameters parameters) {
+        int framesInterval = 100 - parameters.getSpeed();
+        parameters.setFramesInterval(framesInterval);
+        return new Enemy(parameters);
     }
 
-    private static Bonus generateBonus(Bundle b, Context context) {
-        return new Bonus(BitmapFactory.decodeResource(
-                context.getResources(),
-                b.getInt("ID")),
-                b.getInt("X"),
-                b.getInt("Y"),
-                b.getInt("WIDTH"),
-                b.getInt("HEIGHT"),
-                b.getInt("SPEED"),
-                b.getString("TYPE"),
-                b.getString("SUBTYPE")
-        );
+    private static Bonus generateBonus(ObjectParameters parameters) {
+        return new Bonus(parameters);
     }
 }

@@ -9,19 +9,16 @@ import pl.grzegorziwanek.jumpgame.app.models.gamemodel.sessionmodel.SessionData;
 import pl.grzegorziwanek.jumpgame.app.models.gamemodel.sessionmodel.SessionThread;
 import pl.grzegorziwanek.jumpgame.app.models.gameobjects.Background;
 import pl.grzegorziwanek.jumpgame.app.models.gameobjects.GameObjectContainer;
-import pl.grzegorziwanek.jumpgame.app.models.gameobjects.objects.Player;
+import pl.grzegorziwanek.jumpgame.app.models.gameobjects.objects.bonus.Player;
 import pl.grzegorziwanek.jumpgame.app.viewmodel.CallbackViewModel;
 
 public class GameModel {
-
-    private Context mContext;
     private CallbackViewModel mCallback;
     private final GamePanel mGamePanel;
     private SessionData mSessionData;
     private SessionThread mSessionThread;
 
     public GameModel(Context context, GamePanel gamePanel, CallbackViewModel callback) {
-        mContext = context;
         mCallback = callback;
         mGamePanel = gamePanel;
         mGamePanel.setCallback(new Callbacks.PanelCallback() {
@@ -55,8 +52,8 @@ public class GameModel {
             }
 
             @Override
-            public void onEnemyCollision() {
-                mCallback.onEnemyCollision();
+            public void onEnemyCollision(String subtype) {
+                mCallback.onEnemyCollision(subtype);
             }
 
             @Override
@@ -65,14 +62,14 @@ public class GameModel {
             }
         });
 
-        mSessionThread = new SessionThread(mGamePanel.getHolder(), new Callbacks.ThreadCallback() {
+        mSessionThread = new SessionThread(new Callbacks.ThreadCallback() {
             @Override
-            public void lockCanvasCallback() {
+            public void tryLockCanvasCallback() {
                 mGamePanel.lockCanvas();
             }
 
             @Override
-            public void unlockCanvasCallback() {
+            public void tryUnlockCanvasCallback() {
                 mGamePanel.unlockCanvas();
             }
         });
@@ -85,10 +82,6 @@ public class GameModel {
             mSessionThread.start();
         }
         mSessionData.setRunning(true);
-    }
-
-    public GamePanel getPanelForBinding() {
-        return mGamePanel;
     }
 
     public void movePlayerUp() {

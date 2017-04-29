@@ -11,6 +11,15 @@ import android.os.Build;
 import android.support.annotation.RequiresApi;
 import android.view.View;
 
+import io.reactivex.Flowable;
+import io.reactivex.Observable;
+import io.reactivex.Observer;
+import io.reactivex.SingleObserver;
+import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.annotations.NonNull;
+import io.reactivex.disposables.Disposable;
+import io.reactivex.observers.DisposableObserver;
+import io.reactivex.schedulers.Schedulers;
 import pl.grzegorziwanek.jumpgame.app.BR;
 import pl.grzegorziwanek.jumpgame.app.R;
 import pl.grzegorziwanek.jumpgame.app.models.gamemodel.GameModel;
@@ -27,7 +36,6 @@ public class GameViewModel extends BaseObservable {
     @Bindable private ObservableInt mScore = new ObservableInt(0);
     @Bindable private ObservableInt mBestScore = new ObservableInt(0);
 
-
     public GameViewModel(Context context, GamePanel gamePanel) {
         mContext = context;
         setSoundPools();
@@ -37,8 +45,8 @@ public class GameViewModel extends BaseObservable {
     private void setGameModel(Context context, GamePanel gamePanel) {
         mGameModel = new GameModel(context, gamePanel, new CallbackViewModel() {
             @Override
-            public void onEnemyCollision() {
-                playSound("ENEMY");
+            public void onEnemyCollision(String subtype) {
+                playSound(subtype);
             }
 
             @Override
@@ -102,8 +110,11 @@ public class GameViewModel extends BaseObservable {
             case "TRAP":
                 soundPoolCollision.load(mContext, R.raw.mouse_trap_sound, 1);
                 break;
-            case "ENEMY":
+            case "CAT":
                 soundPoolCollision.load(mContext, R.raw.cat_angry, 1);
+                break;
+            case "BALL":
+                soundPoolCollision.load(mContext, R.raw.ball_collision, 1);
                 break;
             case "RESET":
                 break;

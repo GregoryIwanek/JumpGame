@@ -18,7 +18,7 @@ public class GameActivity extends Activity {
         addFragment();
     }
 
-    // call it before setContentView(...) - sys requirement
+    // call it before setContentView(...) - system requirement
     private void initDefaultFlags() {
         requestWindowFeature(Window.FEATURE_NO_TITLE);
         getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,

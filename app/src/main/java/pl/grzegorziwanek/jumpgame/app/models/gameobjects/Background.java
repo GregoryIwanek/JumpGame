@@ -8,42 +8,37 @@ import pl.grzegorziwanek.jumpgame.app.utilis.Cons;
 
 /**
  * Created by Grzegorz Iwanek on 25.08.2016.
- * Contains class responsible for storing information about background image, updating them (position), and redrawing them on given canvas
+ * Contains class responsible for storing information about background mImage, updating them (position), and redrawing them on given canvas
  */
 public class Background {
-    private Bitmap image;
 
-    //position coordinates and step on X axis
-    private int x = 0;
-    private int y = 0;
-    private int dx = 0;
+    private Bitmap mImage;
+    private int mX = 0;
+    private int mY = 0;
+    private int mDx = 0;
     private int mScreenWidth = 0;
 
     public Background(Bitmap image, int screenWidth) {
-        this.image = image;
+        mImage = image;
         mScreenWidth = screenWidth;
-        this.dx = Cons.MOVESPEED;
+        mDx = Cons.MOVE_SPEED;
     }
 
     public void update() {
         //update position of background
-        x+=dx;
+        mX += mDx;
 
-        //if image is off screen, reset it's position to start position
-        if (x <= -mScreenWidth) {
-            x=0;
+        //if mImage is off screen, reset it's position to start position
+        if (mX <= -mScreenWidth) {
+            mX =0;
         }
     }
 
     public void draw(Canvas canvas) {
-        //draw first background image on the canvas
-        canvas.drawBitmap(image, x, y, null);
+        //draw first background mImage on the canvas
+        canvas.drawBitmap(mImage, mX, mY, null);
 
-        //draw second image, just right after first one ( illusion of constant backgrount terrain)
-        canvas.drawBitmap(image, x+ mScreenWidth, y, null);
-
-        //TODO: test one below on real phone, not in emulator, to make sure it's needed
-        //Just in case: in emulator there is a black space for a second, after resetting images x position (update() method)
-        canvas.drawBitmap(image, x+2*mScreenWidth, y, null);
+        //draw second mImage, just right after first one ( illusion of continuous background)
+        canvas.drawBitmap(mImage, mX + mScreenWidth, mY, null);
     }
 }

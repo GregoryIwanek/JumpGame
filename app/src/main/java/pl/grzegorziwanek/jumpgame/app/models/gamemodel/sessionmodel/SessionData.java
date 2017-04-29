@@ -5,7 +5,6 @@ import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Rect;
-import android.os.Bundle;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -14,15 +13,14 @@ import java.util.Random;
 import pl.grzegorziwanek.jumpgame.app.R;
 import pl.grzegorziwanek.jumpgame.app.models.gamemodel.Callbacks.DataCallback;
 import pl.grzegorziwanek.jumpgame.app.models.gameobjects.Background;
-import pl.grzegorziwanek.jumpgame.app.models.gameobjects.GameObject;
+import pl.grzegorziwanek.jumpgame.app.models.gameobjects.objects.GameBaseObject;
 import pl.grzegorziwanek.jumpgame.app.models.gameobjects.GameObjectContainer;
-import pl.grzegorziwanek.jumpgame.app.models.gameobjects.objects.Enemy;
-import pl.grzegorziwanek.jumpgame.app.models.gameobjects.objects.Player;
+import pl.grzegorziwanek.jumpgame.app.models.gameobjects.objects.bonus.Player;
 import pl.grzegorziwanek.jumpgame.app.models.objectfactory.ObjectFactory;
 import pl.grzegorziwanek.jumpgame.app.utilis.Cons;
+import pl.grzegorziwanek.jumpgame.app.models.gameobjects.objects.ObjectParameters;
 
 public class SessionData {
-
     private DataCallback mCallback;
     private Context mContext;
     private Resources mResources;
@@ -30,12 +28,10 @@ public class SessionData {
     private Bitmap mScaledImage;
     private Background mBackground;
     private Player mPlayer;
-
     private Random mRand = new Random();
     private long mEnemyStartTime;
     private long mBonusStartTime;
     private boolean sObjectWasAdded; //set true if object was added to list recently
-
     private int mWidth;
     private int mHeight;
     private int mBestScore;
@@ -68,10 +64,14 @@ public class SessionData {
     private void initObjects() {
         // background
         Bitmap backImage = BitmapFactory.decodeResource(mResources, R.drawable.floor_background);
+        Bitmap playerImage = BitmapFactory.decodeResource(mResources, R.drawable.mouse_walk);
         mScaledImage = Bitmap.createScaledBitmap(backImage, mWidth, mHeight, true);
-        mBackground = new Background(mScaledImage, mWidth);
 
-        mPlayer = (Player) ObjectFactory.getUnwrappedObject(generatePlayerData(), mContext);
+        mBackground = new Background(mScaledImage, mWidth);
+        mPlayer = (Player) ObjectFactory.getUnwrappedObject(wrapObjectParameters(
+                Cons.START_POSITION, Cons.sScreenHeight/2, 50, 50, 0, "PLAYER", "NONE",
+                playerImage, 12));
+
         mGameObjects = new ArrayList<>();
     }
 
@@ -115,11 +115,11 @@ public class SessionData {
 
     private void spawnEnemy() {
         //set random starting position and calculate speed, set caps (inside enemy class - if needed)
-        int yRand = (int)(mRand.nextDouble()*mHeight - (100+Cons.SPAWNMARGIN));
-        if (yRand < Cons.SPAWNMARGIN) {
-            yRand = Cons.SPAWNMARGIN;
+        int yRand = (int)(mRand.nextDouble()*mHeight - (100+Cons.SPAWN_MARGIN));
+        if (yRand < Cons.SPAWN_MARGIN) {
+            yRand = Cons.SPAWN_MARGIN;
         }
-        //set random speed of enemy, hold it between 40 and MOVESPEED (5) of a background
+        //set random speed of enemy, hold it between 40 and MOVE_SPEED (5) of a background
         int speed = 4 + (int)(mRand.nextDouble()*mPlayer.getScore()/20); //rand.nextDouble() gives 1
         if (speed < 10) {
             speed = 5;
@@ -129,33 +129,85 @@ public class SessionData {
 
         //define bitmap frame image and numFrames, depending on speed of enemy, pick one of types
         // of images to show ( fast running cat, walking cat etc;)
-        Bitmap image;
         int numFrames;
+        int resId;
         int width = 200;
         int height = 75;
+        int x = mWidth+30;
+        int randImage = mRand.nextInt(2);
+        int randType = mRand.nextInt(4);
+        String subtype;
 
         if (speed == 5) {
-            //picture - cat sitting in one place
-            image = BitmapFactory.decodeResource(mResources, R.drawable.cat_sleeping);
+            if (randType == 3) {
+                resId = R.drawable.ball;
+                width = 50;
+                height = 50;
+                subtype = "BALL";
+            } else {
+                if (randImage==0) {
+                    resId = R.drawable.white_cat_sleeping;
+                } else {
+                    resId = R.drawable.cat_sleeping;
+                }
+                subtype = "CAT";
+            }
             numFrames = 1;
         } else if (speed < 20) {
-            //picture - cat walking slowly
-            image = BitmapFactory.decodeResource(mResources, R.drawable.cat_normal_speed);
-            numFrames = 12;
+            if (randType == 3) {
+                resId = R.drawable.ball;
+                width = 50;
+                height = 50;
+                numFrames = 4;
+                subtype = "BALL";
+            } else {
+                if (randImage == 0) {
+                    resId = R.drawable.white_cat_normal_speed;
+                } else {
+                    resId = R.drawable.cat_normal_speed;
+                }
+                numFrames = 12;
+                subtype = "CAT";
+            }
         } else if (speed < 30) {
-            //picture - cat running slowly
-            image = BitmapFactory.decodeResource(mResources, R.drawable.cat_slow_run);
-            numFrames = 16;
+            if (randType == 3) {
+                resId = R.drawable.ball;
+                width = 50;
+                height = 50;
+                numFrames = 4;
+                subtype = "BALL";
+            } else {
+                if (randImage == 0) {
+                    resId = R.drawable.white_cat_slow_run;
+                } else {
+                    resId = R.drawable.cat_slow_run;
+                }
+                numFrames = 16;
+                subtype = "CAT";
+            }
         } else {
-            //picture - fast running cat
-            image = BitmapFactory.decodeResource(mResources, R.drawable.cat_sprint_speed);
-            numFrames = 13;
+            if (randType == 3) {
+                resId = R.drawable.ball;
+                width = 50;
+                height = 50;
+                numFrames = 4;
+                subtype = "BALL";
+            } else {
+                if (randImage == 0) {
+                    resId = R.drawable.white_cat_sprint_speed;
+                } else {
+                    resId = R.drawable.cat_sprint_speed;
+                }
+                numFrames = 13;
+                subtype = "CAT";
+            }
         }
 
         //add object to list
-        mGameObjects.add(new GameObjectContainer(new Enemy(image, mWidth+30, yRand, width, height, speed, numFrames, "ENEMY")));
-
-        //reset timer
+       Bitmap enemyImage = BitmapFactory.decodeResource(mResources, resId);
+        mGameObjects.add(ObjectFactory.getWrappedObject(wrapObjectParameters(
+                x, yRand, width, height, speed, "ENEMY", subtype, enemyImage, numFrames
+        )));
         mEnemyStartTime = System.nanoTime();
     }
 
@@ -188,21 +240,21 @@ public class SessionData {
         switch (randomType) {
             case 0:
                 resId = R.drawable.cheese;
-                yRand = (int) (mRand.nextDouble() * mHeight - (Cons.SPAWNMARGIN + 50));
+                yRand = (int) (mRand.nextDouble() * mHeight - (Cons.SPAWN_MARGIN + 50));
                 width = 75;
                 height = 50;
                 subtype = "CHEESE";
                 break;
             case 1:
                 resId = R.drawable.mouse_trap;
-                yRand = (int) (mRand.nextDouble() * mHeight - (Cons.SPAWNMARGIN + 50));
-                width = 50;
-                height = 50;
+                yRand = (int) (mRand.nextDouble() * mHeight - (Cons.SPAWN_MARGIN + 50));
+                width = 125;
+                height = 75;
                 subtype = "TRAP";
                 break;
             default:
                 resId = R.drawable.cheese;
-                yRand = (int) (mRand.nextDouble() * mHeight - (Cons.SPAWNMARGIN + 50));
+                yRand = (int) (mRand.nextDouble() * mHeight - (Cons.SPAWN_MARGIN + 50));
                 width = 75;
                 height = 50;
                 subtype = "CHEESE";
@@ -210,15 +262,15 @@ public class SessionData {
         }
 
         //make sure, object is on screen (cant't be below 0-> example: yRand = got 10 - 200(image height) = -190;)
-        if(yRand < Cons.SPAWNMARGIN) {
-            yRand = Cons.SPAWNMARGIN;
+        if(yRand < Cons.SPAWN_MARGIN) {
+            yRand = Cons.SPAWN_MARGIN;
         }
 
 
         //add object to container list
+        Bitmap imageRes = BitmapFactory.decodeResource(mResources, resId);
         mGameObjects.add(ObjectFactory.getWrappedObject(
-                generateBonusData(subtype, resId, x, yRand, width, height, Cons.MOVESPEED),
-                mContext));
+                wrapObjectParameters(x, yRand, width, height, Cons.MOVE_SPEED, "BONUS", subtype, imageRes, 0)));
 
         //reset timer
         mBonusStartTime = System.nanoTime();
@@ -242,7 +294,7 @@ public class SessionData {
                 (object1, object2) -> object1.comparePosition() - object2.comparePosition());
     }
 
-    private boolean collision(GameObjectContainer object1, GameObject object2) {
+    private boolean collision(GameObjectContainer object1, GameBaseObject object2) {
         return Rect.intersects(object1.getRectangle(), object2.getRectangle());
     }
 
@@ -260,13 +312,17 @@ public class SessionData {
             if(collision(mGameObjects.get(i), mPlayer)) {
                 switch (mGameObjects.get(i).getObjectType()) {
                     case "ENEMY":
-                        mGameObjects.remove(i);
-                        mCallback.onEnemyCollision();
-                        isRunning = false;
+                        if (mGameObjects.get(i).getObjectSubtype().equals("CAT")) {
+                            mGameObjects.remove(i);
+                            mCallback.onEnemyCollision("CAT");
+                            isRunning = false;
+                        } else {
+                            mGameObjects.remove(i);
+                            mCallback.onEnemyCollision("BALL");
+                            isRunning = false;
+                        }
                         break;
                     case "BONUS":
-                        // TODO: 23.04.2017 refactor that part (split subtypes of bonuses)
-                        System.out.println("CHECK COLLISION: " + mGameObjects.get(i).getObjectSubtype());
                         if (mGameObjects.get(i).getObjectSubtype().equals("CHEESE")) {
                             mGameObjects.remove(i);
                             updateBonusValue("CHEESE");
@@ -302,53 +358,29 @@ public class SessionData {
         }
     }
 
-    private Bundle generatePlayerData() {
-        Bundle b = new Bundle();
-        b.putString("TYPE", "PLAYER");
-        b.putInt("ID", R.drawable.mouse_walk);
-        b.putInt("WIDTH", 50);
-        b.putInt("HEIGHT", 50);
-        b.putInt("FRAMES", 12);
-        return b;
-    }
-
-    private Bundle generateEnemeyData() {
-        Bundle b = new Bundle();
-        b.putString("TYPE", "PLAYER");
-        b.putInt("ID", R.drawable.mouse_walk);
-        b.putInt("WIDTH", 50);
-        b.putInt("HEIGHT", 50);
-        b.putInt("FRAMES", 12);
-        return b;
-    }
-
-    private Bundle generateBonusData(String subtype,int resId, int x, int y, int width, int height, int speed) {
-        Bundle b = new Bundle();
-        b.putString("TYPE", "BONUS");
-        b.putString("SUBTYPE", subtype);
-        b.putInt("ID", resId);
-        b.putInt("X", x);
-        b.putInt("Y", y);
-        b.putInt("WIDTH", width);
-        b.putInt("HEIGHT", height);
-        b.putInt("SPEED", speed);
-        return b;
+    private ObjectParameters wrapObjectParameters(int x, int y, int width, int height, int speed,
+                                                  String type, String subType, Bitmap imageRes, int numFrames) {
+        ObjectParameters parameters = new ObjectParameters();
+        parameters.setX(x);
+        parameters.setY(y);
+        parameters.setWidth(width);
+        parameters.setHeight(height);
+        parameters.setSpeed(speed);
+        parameters.setType(type);
+        parameters.setSubType(subType);
+        parameters.setImageRes(imageRes);
+        parameters.setNumFrames(numFrames);
+        return parameters;
     }
 
     public void setNewGame() {
         mGameObjects.clear();
-        mPlayer.setY(mHeight/2);
         mPlayer.reset();
         mEnemyStartTime = 0;
         mBonusStartTime = 0;
         sObjectWasAdded = false;
         mBonusCollected = 0;
-        // TODO: 20.04.2017 add callback with score
         mCallback.onBonusCollected(mBonusCollected, "RESET");
-    }
-
-    public Background getBackground() {
-        return mBackground;
     }
 
     public boolean isRunning() {
@@ -366,27 +398,4 @@ public class SessionData {
     public void movePlayerDown() {
         mPlayer.moveDown();
     }
-
-//    public void drawText(Canvas canvas) {
-//        Paint paint = new Paint();
-//        paint.setColor(Color.BLACK);
-//        paint.setTextSize(30);
-//        paint.setTypeface(Typeface.create(Typeface.DEFAULT, Typeface.BOLD));
-//
-//        canvas.drawText("SCORE: " + mPlayer.getScore(), 25, sScreenHeight - 25, paint);
-//        canvas.drawText("BEST SCORE: " + mBestScore, sScreenWidth - 325, sScreenHeight-25, paint);
-//    }
-//
-//    public void drawBonusBar(Canvas canvas) {
-//        for (int i=0; i<5; i++) {
-//            Bitmap image;
-//            if (i<mBonusCollected) {
-//                image = BitmapFactory.decodeResource(getResources(), R.drawable.cheese_50x50);
-//            } else {
-//                image = BitmapFactory.decodeResource(getResources(), R.drawable.x_sign);
-//            }
-//
-//            canvas.drawBitmap(image, 25+i*60, 10, null);
-//        }
-//    }
 }
