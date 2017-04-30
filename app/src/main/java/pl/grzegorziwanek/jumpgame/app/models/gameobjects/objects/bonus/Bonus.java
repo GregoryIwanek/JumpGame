@@ -4,7 +4,7 @@ import android.graphics.Canvas;
 
 import pl.grzegorziwanek.jumpgame.app.models.gameobjects.GameObjectService;
 import pl.grzegorziwanek.jumpgame.app.models.gameobjects.objects.GameStaticObject;
-import pl.grzegorziwanek.jumpgame.app.models.gameobjects.objects.ObjectParameters;
+import pl.grzegorziwanek.jumpgame.app.utilis.ObjectParameters;
 
 /**
  * Created by Grzegorz Iwanek on 27.08.2016.

@@ -18,7 +18,7 @@ import pl.grzegorziwanek.jumpgame.app.models.gameobjects.GameObjectContainer;
 import pl.grzegorziwanek.jumpgame.app.models.gameobjects.objects.bonus.Player;
 import pl.grzegorziwanek.jumpgame.app.models.objectfactory.ObjectFactory;
 import pl.grzegorziwanek.jumpgame.app.utilis.Cons;
-import pl.grzegorziwanek.jumpgame.app.models.gameobjects.objects.ObjectParameters;
+import pl.grzegorziwanek.jumpgame.app.utilis.ObjectParameters;
 
 public class SessionData {
     private DataCallback mCallback;
@@ -32,8 +32,8 @@ public class SessionData {
     private long mEnemyStartTime;
     private long mBonusStartTime;
     private boolean sObjectWasAdded; //set true if object was added to list recently
-    private int mWidth;
-    private int mHeight;
+    private int mScreenWidth;
+    private int mScreenHeight;
     private int mBestScore;
     private int mBonusCollected;
     private boolean isRunning;
@@ -51,9 +51,9 @@ public class SessionData {
     }
 
     private void initVariables() {
-        mWidth = mContext.getResources().getDisplayMetrics().widthPixels;
-        mHeight = mContext.getResources().getDisplayMetrics().heightPixels;
-        Cons.initScreenSize(mWidth, mHeight);
+        mScreenWidth = mContext.getResources().getDisplayMetrics().widthPixels;
+        mScreenHeight = mContext.getResources().getDisplayMetrics().heightPixels;
+        Cons.initScreenSize(mScreenWidth, mScreenHeight);
         mBestScore = 0;
         mBonusCollected = 0;
         sObjectWasAdded = false;
@@ -65,10 +65,10 @@ public class SessionData {
         // background
         Bitmap backImage = BitmapFactory.decodeResource(mResources, R.drawable.floor_background);
         Bitmap playerImage = BitmapFactory.decodeResource(mResources, R.drawable.mouse_walk);
-        mScaledImage = Bitmap.createScaledBitmap(backImage, mWidth, mHeight, true);
+        mScaledImage = Bitmap.createScaledBitmap(backImage, mScreenWidth, mScreenHeight, true);
 
-        mBackground = new Background(mScaledImage, mWidth);
-        mPlayer = (Player) ObjectFactory.getUnwrappedObject(wrapObjectParameters(
+        mBackground = new Background(mScaledImage, mScreenWidth);
+        mPlayer = (Player) ObjectFactory.getUnwrappedObject(new ObjectParameters(
                 Cons.START_POSITION, Cons.sScreenHeight/2, 50, 50, 0, "PLAYER", "NONE",
                 playerImage, 12));
 
@@ -101,114 +101,16 @@ public class SessionData {
         long enemyElapsed = (System.nanoTime() - mEnemyStartTime) / 1000000;
 
         //calculate period between spawning enemies ( possible range 1.5 - 4 sec);
-        long spawnDelay = 4000 - mPlayer.getScore()/3;
-        if(spawnDelay < 1500) {
-            spawnDelay = 1500;
+        long spawnDelay = 3500 - mPlayer.getScore()/3;
+        if(spawnDelay < 1000) {
+            spawnDelay = 1000;
         }
 
         //spawn enemy on the screen
         if(enemyElapsed > spawnDelay) {
-            spawnEnemy();
+            spawnObject("ENEMY");
             sObjectWasAdded = true;
         }
-    }
-
-    private void spawnEnemy() {
-        //set random starting position and calculate speed, set caps (inside enemy class - if needed)
-        int yRand = (int)(mRand.nextDouble()*mHeight - (100+Cons.SPAWN_MARGIN));
-        if (yRand < Cons.SPAWN_MARGIN) {
-            yRand = Cons.SPAWN_MARGIN;
-        }
-        //set random speed of enemy, hold it between 40 and MOVE_SPEED (5) of a background
-        int speed = 4 + (int)(mRand.nextDouble()*mPlayer.getScore()/20); //rand.nextDouble() gives 1
-        if (speed < 10) {
-            speed = 5;
-        } else if(speed>40) {
-            speed = 40;
-        }
-
-        //define bitmap frame image and numFrames, depending on speed of enemy, pick one of types
-        // of images to show ( fast running cat, walking cat etc;)
-        int numFrames;
-        int resId;
-        int width = 200;
-        int height = 75;
-        int x = mWidth+30;
-        int randImage = mRand.nextInt(2);
-        int randType = mRand.nextInt(4);
-        String subtype;
-
-        if (speed == 5) {
-            if (randType == 3) {
-                resId = R.drawable.ball;
-                width = 50;
-                height = 50;
-                subtype = "BALL";
-            } else {
-                if (randImage==0) {
-                    resId = R.drawable.white_cat_sleeping;
-                } else {
-                    resId = R.drawable.cat_sleeping;
-                }
-                subtype = "CAT";
-            }
-            numFrames = 1;
-        } else if (speed < 20) {
-            if (randType == 3) {
-                resId = R.drawable.ball;
-                width = 50;
-                height = 50;
-                numFrames = 4;
-                subtype = "BALL";
-            } else {
-                if (randImage == 0) {
-                    resId = R.drawable.white_cat_normal_speed;
-                } else {
-                    resId = R.drawable.cat_normal_speed;
-                }
-                numFrames = 12;
-                subtype = "CAT";
-            }
-        } else if (speed < 30) {
-            if (randType == 3) {
-                resId = R.drawable.ball;
-                width = 50;
-                height = 50;
-                numFrames = 4;
-                subtype = "BALL";
-            } else {
-                if (randImage == 0) {
-                    resId = R.drawable.white_cat_slow_run;
-                } else {
-                    resId = R.drawable.cat_slow_run;
-                }
-                numFrames = 16;
-                subtype = "CAT";
-            }
-        } else {
-            if (randType == 3) {
-                resId = R.drawable.ball;
-                width = 50;
-                height = 50;
-                numFrames = 4;
-                subtype = "BALL";
-            } else {
-                if (randImage == 0) {
-                    resId = R.drawable.white_cat_sprint_speed;
-                } else {
-                    resId = R.drawable.cat_sprint_speed;
-                }
-                numFrames = 13;
-                subtype = "CAT";
-            }
-        }
-
-        //add object to list
-       Bitmap enemyImage = BitmapFactory.decodeResource(mResources, resId);
-        mGameObjects.add(ObjectFactory.getWrappedObject(wrapObjectParameters(
-                x, yRand, width, height, speed, "ENEMY", subtype, enemyImage, numFrames
-        )));
-        mEnemyStartTime = System.nanoTime();
     }
 
     private void updateBonus() {
@@ -216,64 +118,152 @@ public class SessionData {
         long bonusElapsed = (System.nanoTime() - mBonusStartTime) / 1000000;
 
         //calculate spawn delay ( time between spawning bonuses)
-        long spawnDelay = 5000 - mPlayer.getScore()/5;
-        if(spawnDelay < 2000) {
-            spawnDelay = 2000;
+        long spawnDelay = 4000 - mPlayer.getScore()/4;
+        if(spawnDelay < 1000) {
+            spawnDelay = 1000;
         }
 
         //spawn object if spawn delay has passed
         if(bonusElapsed > spawnDelay) {
-            spawnBonus();
+            spawnObject("BONUS");
             sObjectWasAdded = true;
         }
     }
 
-    private void spawnBonus() {
-        String subtype;
-        int height;
-        int width;
-        int resId;
-        int yRand;
-        int x = mWidth+30;
+    private void spawnObject(String type) {
+        ObjectParameters parameters = setObjectParameters(type);
+        mGameObjects.add(ObjectFactory.getWrappedObject(parameters));
+    }
 
-        int randomType = mRand.nextInt(2);
-        switch (randomType) {
+    private ObjectParameters setObjectParameters(String type) {
+        ObjectParameters parameters = new ObjectParameters();
+        parameters.setX(Cons.sSpawnX);
+        parameters.setType(type);
+        switch (type) {
+            case "ENEMY":
+                parameters = setEnemyParameters(parameters);
+                break;
+            case "BONUS":
+                parameters = setBonusParameters(parameters);
+                break;
+        }
+        return parameters;
+    }
+
+    private ObjectParameters setEnemyParameters(ObjectParameters p) {
+        int randSubType = mRand.nextInt(2);
+        switch (randSubType) {
             case 0:
-                resId = R.drawable.cheese;
-                yRand = (int) (mRand.nextDouble() * mHeight - (Cons.SPAWN_MARGIN + 50));
-                width = 75;
-                height = 50;
-                subtype = "CHEESE";
+                p.setSubType("CAT");
+                setBasicObjectParameters(p, 200, 75, getRandomSpeed(false));
+                setAnimatedImage(p);
                 break;
             case 1:
-                resId = R.drawable.mouse_trap;
-                yRand = (int) (mRand.nextDouble() * mHeight - (Cons.SPAWN_MARGIN + 50));
-                width = 125;
-                height = 75;
-                subtype = "TRAP";
-                break;
-            default:
-                resId = R.drawable.cheese;
-                yRand = (int) (mRand.nextDouble() * mHeight - (Cons.SPAWN_MARGIN + 50));
-                width = 75;
-                height = 50;
-                subtype = "CHEESE";
+                p.setSubType("BALL");
+                setBasicObjectParameters(p, 50, 50,getRandomSpeed(true));
+                setAnimatedImage(p);
                 break;
         }
+        mEnemyStartTime = System.nanoTime();
+        return p;
+    }
 
-        //make sure, object is on screen (cant't be below 0-> example: yRand = got 10 - 200(image height) = -190;)
-        if(yRand < Cons.SPAWN_MARGIN) {
-            yRand = Cons.SPAWN_MARGIN;
+    private ObjectParameters setBonusParameters(ObjectParameters p) {
+        int randSubType = mRand.nextInt(2);
+        switch (randSubType) {
+            case 0:
+                p.setSubType("CHEESE");
+                p.setImageRes(BitmapFactory.decodeResource(mResources, R.drawable.cheese_yellow));
+                setBasicObjectParameters(p, 75, 50);
+                break;
+            case 1:
+                p.setSubType("TRAP");
+                p.setImageRes(BitmapFactory.decodeResource(mResources, R.drawable.mouse_trap));
+                setBasicObjectParameters(p, 125, 75);
+                break;
         }
-
-
-        //add object to container list
-        Bitmap imageRes = BitmapFactory.decodeResource(mResources, resId);
-        mGameObjects.add(ObjectFactory.getWrappedObject(
-                wrapObjectParameters(x, yRand, width, height, Cons.MOVE_SPEED, "BONUS", subtype, imageRes, 0)));
-
-        //reset timer
         mBonusStartTime = System.nanoTime();
+        return p;
+    }
+
+    private int getRandomPosition(int objectHeight) {
+        int yRandom = (int) (mRand.nextDouble() * mScreenHeight - (Cons.SPAWN_MARGIN + objectHeight));
+        if (yRandom < Cons.SPAWN_MARGIN) {
+            yRandom = Cons.SPAWN_MARGIN;
+        }
+        return yRandom;
+    }
+
+    // TODO: 30.04.2017 refactor this part
+    private int getRandomSpeed(boolean isAlwaysMoving) {
+        int speed = 5 + (int)(mRand.nextDouble()*mPlayer.getScore()/20);
+        if (speed < 8 && !isAlwaysMoving) {
+            speed = 5;
+        } else if (speed < 8 && isAlwaysMoving) {
+            speed = 8;
+        } else if(speed > 30) {
+            speed = 30;
+        }
+        return speed;
+    }
+
+    private void setBasicObjectParameters(ObjectParameters p, int width, int height) {
+        setBasicObjectParameters(p, width, height, Cons.MOVE_SPEED);
+    }
+
+    private void setBasicObjectParameters(ObjectParameters p, int width, int height, int speed) {
+        p.setWidth(width);
+        p.setHeight(height);
+        p.setSpeed(speed);
+        p.setY(getRandomPosition(height));
+    }
+
+    private void setAnimatedImage(ObjectParameters p) {
+        Bitmap bitmap;
+        int resId;
+        int numFrames;
+
+        String key = setDrawableKey(p.getSubType(), p.getSpeed());
+        resId = Cons.drawableMap.get(key).getResId();
+        numFrames = Cons.drawableMap.get(key).getNumFrames();
+        bitmap = BitmapFactory.decodeResource(mResources, resId);
+
+        p.setImageRes(bitmap);
+        p.setNumFrames(numFrames);
+    }
+
+    private String setDrawableKey(String subtype, int speed) {
+        String key = addTypeToKey(subtype);
+        key = addSpeedToKey(key, speed);
+        key = addColorToKey(key);
+        return key;
+    }
+
+    private String addTypeToKey(String subType) {
+        return subType + "_";
+    }
+
+    private String addSpeedToKey(String key, int speed) {
+        if (speed == 5) {
+            key += "STATIC_";
+        } else if (speed < 15) {
+            key += "SLOW_";
+        } else if (speed < 25) {
+            key += "MEDIUM_";
+        } else {
+            key += "FAST_";
+        }
+        return key;
+    }
+
+    private String addColorToKey(String key) {
+        int rand = mRand.nextInt(2);
+        if (rand == 0) {
+            key += "COLOR_1";
+        } else {
+            key += "COLOR_2";
+        }
+        return key;
     }
 
     private void updateObjects() {
@@ -356,21 +346,6 @@ public class SessionData {
             }
             mCallback.onBonusCollected(mBonusCollected, "TRAP");
         }
-    }
-
-    private ObjectParameters wrapObjectParameters(int x, int y, int width, int height, int speed,
-                                                  String type, String subType, Bitmap imageRes, int numFrames) {
-        ObjectParameters parameters = new ObjectParameters();
-        parameters.setX(x);
-        parameters.setY(y);
-        parameters.setWidth(width);
-        parameters.setHeight(height);
-        parameters.setSpeed(speed);
-        parameters.setType(type);
-        parameters.setSubType(subType);
-        parameters.setImageRes(imageRes);
-        parameters.setNumFrames(numFrames);
-        return parameters;
     }
 
     public void setNewGame() {

@@ -6,6 +6,7 @@ import android.view.Window;
 import android.view.WindowManager;
 
 import pl.grzegorziwanek.jumpgame.app.R;
+import pl.grzegorziwanek.jumpgame.app.utilis.Cons;
 import pl.grzegorziwanek.jumpgame.app.view.fragments.GameFragment;
 
 public class GameActivity extends Activity {
@@ -14,6 +15,7 @@ public class GameActivity extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         initDefaultFlags();
+        initDrawableMap();
         setContentView(R.layout.game_activity);
         addFragment();
     }
@@ -30,5 +32,9 @@ public class GameActivity extends Activity {
                 .beginTransaction()
                 .replace(R.id.contentFrame, new GameFragment())
                 .commit();
+    }
+
+    private void initDrawableMap() {
+        Cons.initDrawableMap();
     }
 }

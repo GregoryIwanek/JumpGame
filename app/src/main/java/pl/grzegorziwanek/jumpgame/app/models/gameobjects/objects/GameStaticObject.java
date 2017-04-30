@@ -2,6 +2,8 @@ package pl.grzegorziwanek.jumpgame.app.models.gameobjects.objects;
 
 import android.graphics.Bitmap;
 
+import pl.grzegorziwanek.jumpgame.app.utilis.ObjectParameters;
+
 /**
  * Consists of abstract class responsible for non-animated objects.
  */

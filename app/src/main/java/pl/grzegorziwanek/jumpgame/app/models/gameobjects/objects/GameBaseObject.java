@@ -3,6 +3,8 @@ package pl.grzegorziwanek.jumpgame.app.models.gameobjects.objects;
 import android.graphics.Rect;
 import android.support.annotation.NonNull;
 
+import pl.grzegorziwanek.jumpgame.app.utilis.ObjectParameters;
+
 /**
  * Created by Grzegorz Iwanek on 25.08.2016.
  * Contains top level class of game objects in a game;
@@ -19,7 +21,7 @@ public abstract class GameBaseObject implements Comparable<GameBaseObject> {
     protected String mObjectType = "";
     protected String mObjectSubtype = "";
 
-    protected GameBaseObject(ObjectParameters p) {
+    GameBaseObject(ObjectParameters p) {
         mX = p.getX();
         mY = p.getY();
         mWidth = p.getWidth();

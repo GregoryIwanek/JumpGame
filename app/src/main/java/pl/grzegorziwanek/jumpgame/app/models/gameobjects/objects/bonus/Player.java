@@ -4,7 +4,7 @@ import android.graphics.Canvas;
 import android.graphics.Rect;
 
 import pl.grzegorziwanek.jumpgame.app.models.gameobjects.objects.GameDynamicObject;
-import pl.grzegorziwanek.jumpgame.app.models.gameobjects.objects.ObjectParameters;
+import pl.grzegorziwanek.jumpgame.app.utilis.ObjectParameters;
 import pl.grzegorziwanek.jumpgame.app.models.gameobjects.GameObjectService;
 import pl.grzegorziwanek.jumpgame.app.utilis.Cons;
 

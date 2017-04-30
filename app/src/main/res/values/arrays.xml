@@ -1,16 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string-array name="syncFrequency">
-        <item name="1">Once a day</item>
-        <item name="7">Once a week</item>
-        <item name="3">Once a year</item>
-        <item name="0">Never (Update maually)</item>
-    </string-array>
-    <string-array name="syncFrequencyValues">
-        <item name="1">1</item>
-        <item name="7">7</item>
-        <item name="30">30</item>
-        <item name="0">0</item>
-    </string-array>
-
+    <integer-array name="enemy_image">
+        <item name="STATIC_CAT_BLACK">@drawable/cat_static_black</item>
+        <item name="STATIC_CAT_WHITE">@drawable/cat_static_white</item>
+        <item name="SLOW_CAT_BLACK">@drawable/cat_slow_black</item>
+        <item name="SLOW_CAT_WHITE">@drawable/cat_slow_white</item>
+        <item name="MEDIUM_CAT_BLACK">@drawable/cat_medium_black</item>
+        <item name="MEDIUM_CAT_WHITE">@drawable/cat_medium_white</item>
+        <item name="FAST_CAT_BLACK">@drawable/cat_fast_black</item>
+        <item name="FAST_CAT_BLACK">@drawable/cat_fast_white</item>
+    </integer-array>
 </resources>

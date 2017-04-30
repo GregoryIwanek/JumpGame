@@ -1,4 +1,4 @@
-package pl.grzegorziwanek.jumpgame.app.models.gameobjects.objects;
+package pl.grzegorziwanek.jumpgame.app.utilis;
 
 import android.graphics.Bitmap;
 
@@ -16,6 +16,21 @@ public class ObjectParameters {
     private Bitmap imageRes;
     private int numFrames;
     private int framesInterval;
+
+    public ObjectParameters() {}
+
+    public ObjectParameters(int x, int y, int width, int height, int speed,
+                            String type, String subType, Bitmap imageRes, int numFrames) {
+        this.x = x;
+        this.y = y;
+        this.width = width;
+        this.height = height;
+        this.speed = speed;
+        this.type = type;
+        this.subType = subType;
+        this.imageRes = imageRes;
+        this.numFrames = numFrames;
+    }
 
     public int getX() {
         return x;

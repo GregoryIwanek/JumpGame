@@ -3,8 +3,6 @@ package pl.grzegorziwanek.jumpgame.app.utilis;
 import android.graphics.Bitmap;
 import android.view.animation.Animation;
 
-import pl.grzegorziwanek.jumpgame.app.models.gameobjects.objects.ObjectParameters;
-
 /**
  * Created by Grzegorz Iwanek on 25.08.2016.
  * Contains class which extends Animation. Responsible for making animation from given source .pgn file with series of drawings.
@@ -33,8 +31,8 @@ public class CustomAnimation extends Animation {
         mFrames = new Bitmap[numFrames];
         for (int i=0; i<mFrames.length; i++) {
             // x=0, because animation is set of images group vertically
-            // every next image is a i*width ( X/Y axis are switched)
-            mFrames[i] = Bitmap.createBitmap(imageRes, i*width, 0, width, height);
+            // every next image is a i*height
+            mFrames[i] = Bitmap.createBitmap(imageRes, 0, i*height, width, height);
         }
     }
 

@@ -3,7 +3,7 @@ package pl.grzegorziwanek.jumpgame.app.models.objectfactory;
 import pl.grzegorziwanek.jumpgame.app.models.gameobjects.GameObjectContainer;
 import pl.grzegorziwanek.jumpgame.app.models.gameobjects.GameObjectService;
 import pl.grzegorziwanek.jumpgame.app.models.gameobjects.objects.GameBaseObject;
-import pl.grzegorziwanek.jumpgame.app.models.gameobjects.objects.ObjectParameters;
+import pl.grzegorziwanek.jumpgame.app.utilis.ObjectParameters;
 import pl.grzegorziwanek.jumpgame.app.models.gameobjects.objects.bonus.Bonus;
 import pl.grzegorziwanek.jumpgame.app.models.gameobjects.objects.bonus.Enemy;
 import pl.grzegorziwanek.jumpgame.app.models.gameobjects.objects.bonus.Player;
