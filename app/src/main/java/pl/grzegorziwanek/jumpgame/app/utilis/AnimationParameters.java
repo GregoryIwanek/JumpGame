@@ -2,6 +2,7 @@ package pl.grzegorziwanek.jumpgame.app.utilis;
 
 /**
  * Wrapper class for drawable animation information.
+ * Used as value in drawable map {@link Cons}
  */
 public class AnimationParameters {
 

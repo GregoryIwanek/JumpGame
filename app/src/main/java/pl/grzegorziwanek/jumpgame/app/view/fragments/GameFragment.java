@@ -7,6 +7,7 @@ import android.support.annotation.Nullable;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.FrameLayout;
 
 import pl.grzegorziwanek.jumpgame.app.R;
 import pl.grzegorziwanek.jumpgame.app.databinding.GameFragmentBinding;
@@ -16,6 +17,7 @@ import pl.grzegorziwanek.jumpgame.app.viewmodel.GameViewModel;
 public class GameFragment extends Fragment {
     GameFragmentBinding gameFragmentBinding;
     GameViewModel mGameViewModel;
+    FrameLayout mFrameLayout;
 
     @Nullable
     @Override
@@ -28,7 +30,9 @@ public class GameFragment extends Fragment {
     private void initiateBinding() {
         gameFragmentBinding =
                 DataBindingUtil.setContentView(this.getActivity(), R.layout.game_fragment);
-        mGameViewModel = new GameViewModel(this.getActivity(), gameFragmentBinding.gamePanelContainer);
+        mGameViewModel = new GameViewModel(this.getActivity(),
+                gameFragmentBinding.gamePanelContainer,
+                gameFragmentBinding.backgroundCover);
         gameFragmentBinding.setMainGameViewModel(mGameViewModel);
     }
 }

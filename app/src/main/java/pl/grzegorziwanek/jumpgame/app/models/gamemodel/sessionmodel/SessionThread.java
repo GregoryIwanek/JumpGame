@@ -3,6 +3,10 @@ package pl.grzegorziwanek.jumpgame.app.models.gamemodel.sessionmodel;
 import pl.grzegorziwanek.jumpgame.app.models.gamemodel.Callbacks.ThreadCallback;
 import pl.grzegorziwanek.jumpgame.app.utilis.Cons;
 
+/**
+ * Thread class. Performs series of canvas lock, unlock and thread stops
+ * which result in required FPS of a game ( 30FPS).
+ */
 public class SessionThread extends Thread {
 
     private ThreadCallback mCallback;

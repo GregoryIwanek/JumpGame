@@ -1,9 +1,9 @@
-package pl.grzegorziwanek.jumpgame.app.models.gameobjects.objects.bonus;
+package pl.grzegorziwanek.jumpgame.app.models.gameobjects.baseobjects.objects;
 
 import android.graphics.Canvas;
 
 import pl.grzegorziwanek.jumpgame.app.models.gameobjects.GameObjectService;
-import pl.grzegorziwanek.jumpgame.app.models.gameobjects.objects.GameStaticObject;
+import pl.grzegorziwanek.jumpgame.app.models.gameobjects.baseobjects.GameStaticObject;
 import pl.grzegorziwanek.jumpgame.app.utilis.ObjectParameters;
 
 /**

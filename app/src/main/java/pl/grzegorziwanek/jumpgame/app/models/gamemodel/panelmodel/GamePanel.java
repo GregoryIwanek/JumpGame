@@ -6,15 +6,18 @@ import android.util.AttributeSet;
 import android.view.MotionEvent;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
 
 import java.util.ArrayList;
 
+import pl.grzegorziwanek.jumpgame.app.R;
 import pl.grzegorziwanek.jumpgame.app.models.gamemodel.Callbacks.PanelCallback;
 import pl.grzegorziwanek.jumpgame.app.models.gamemodel.GameModel;
 import pl.grzegorziwanek.jumpgame.app.models.gamemodel.sessionmodel.SessionThread;
 import pl.grzegorziwanek.jumpgame.app.models.gameobjects.Background;
 import pl.grzegorziwanek.jumpgame.app.models.gameobjects.GameObjectContainer;
-import pl.grzegorziwanek.jumpgame.app.models.gameobjects.objects.bonus.Player;
+import pl.grzegorziwanek.jumpgame.app.models.gameobjects.baseobjects.objects.Player;
 import pl.grzegorziwanek.jumpgame.app.utilis.Cons;
 
 /**
@@ -51,7 +54,6 @@ public class GamePanel extends SurfaceView implements SurfaceHolder.Callback {
 
     public void unlockCanvas() {
         getHolder().unlockCanvasAndPost(mCanvas);
-        mCallback.onCanvasUnlocked();
     }
 
     @Override

@@ -1,4 +1,4 @@
-package pl.grzegorziwanek.jumpgame.app.models.gameobjects.objects;
+package pl.grzegorziwanek.jumpgame.app.models.gameobjects.baseobjects;
 
 import pl.grzegorziwanek.jumpgame.app.utilis.CustomAnimation;
 import pl.grzegorziwanek.jumpgame.app.utilis.ObjectParameters;

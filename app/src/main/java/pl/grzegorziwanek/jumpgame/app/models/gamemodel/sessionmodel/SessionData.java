@@ -14,13 +14,17 @@ import java.util.Random;
 import pl.grzegorziwanek.jumpgame.app.R;
 import pl.grzegorziwanek.jumpgame.app.models.gamemodel.Callbacks.DataCallback;
 import pl.grzegorziwanek.jumpgame.app.models.gameobjects.Background;
-import pl.grzegorziwanek.jumpgame.app.models.gameobjects.objects.GameBaseObject;
+import pl.grzegorziwanek.jumpgame.app.models.gameobjects.baseobjects.GameBaseObject;
 import pl.grzegorziwanek.jumpgame.app.models.gameobjects.GameObjectContainer;
-import pl.grzegorziwanek.jumpgame.app.models.gameobjects.objects.bonus.Player;
+import pl.grzegorziwanek.jumpgame.app.models.gameobjects.baseobjects.objects.Player;
 import pl.grzegorziwanek.jumpgame.app.models.objectfactory.ObjectFactory;
 import pl.grzegorziwanek.jumpgame.app.utilis.Cons;
 import pl.grzegorziwanek.jumpgame.app.utilis.ObjectParameters;
 
+/**
+ * Session data model class. Consists of essential data and methods responsible for control
+ * over state of the game.
+ */
 public class SessionData {
     private DataCallback mCallback;
     private Context mContext;
@@ -38,6 +42,7 @@ public class SessionData {
     private int mBestScore;
     private int mBonusCollected;
     private boolean isRunning;
+    private boolean isAttackCalled;
 
     public SessionData(Context context, DataCallback callback) {
         mContext = context;
@@ -48,7 +53,7 @@ public class SessionData {
 
     private void initData() {
         initVariables();
-        initObjects();
+        initStartingObjects();
     }
 
     private void initVariables() {
@@ -59,11 +64,11 @@ public class SessionData {
         mBonusCollected = 0;
         sObjectWasAdded = false;
         isRunning = false;
+        isAttackCalled = false;
         mResources = mContext.getResources();
     }
 
-    private void initObjects() {
-        // background
+    private void initStartingObjects() {
         Bitmap backImage = BitmapFactory.decodeResource(mResources, R.drawable.floor_background);
         Bitmap playerImage = BitmapFactory.decodeResource(mResources, R.drawable.mouse_walk);
         mScaledImage = Bitmap.createScaledBitmap(backImage, mScreenWidth, mScreenHeight, true);
@@ -78,12 +83,12 @@ public class SessionData {
 
     public void update() {
         if (isRunning) {
-            mBackground.update();
-            mPlayer.update();
-            updateVariables();
-            updateEnemy();
-            updateBonus();
-            updateObjects();
+            updateStartingObjects();
+            updateGlobalScore();
+            updateEnemySpawn();
+            updateBonusSpawn();
+            updateObjectsData();
+            updateOnAttackCalled();
         } else {
             setNewGame();
         }
@@ -91,20 +96,25 @@ public class SessionData {
         mCallback.onScoreChanged(mPlayer.getScore(), mBestScore);
     }
 
-    private void updateVariables() {
+    private void updateStartingObjects() {
+        mBackground.update();
+        mPlayer.update();
+    }
+
+    private void updateGlobalScore() {
         if (mBestScore < mPlayer.getScore()) {
             mBestScore = mPlayer.getScore();
         }
     }
 
-    private void updateEnemy() {
+    private void updateEnemySpawn() {
         //calculate time passed till now
         long enemyElapsed = (System.nanoTime() - mEnemyStartTime) / 1000000;
 
         //calculate period between spawning enemies ( possible range 1.5 - 4 sec);
         long spawnDelay = 3500 - mPlayer.getScore()/3;
-        if(spawnDelay < 1000) {
-            spawnDelay = 1000;
+        if(spawnDelay < 750) {
+            spawnDelay = 750;
         }
 
         //spawn enemy on the screen
@@ -114,14 +124,14 @@ public class SessionData {
         }
     }
 
-    private void updateBonus() {
+    private void updateBonusSpawn() {
         //calculate time passed till now
         long bonusElapsed = (System.nanoTime() - mBonusStartTime) / 1000000;
 
         //calculate spawn delay ( time between spawning bonuses)
         long spawnDelay = 4000 - mPlayer.getScore()/4;
-        if(spawnDelay < 1000) {
-            spawnDelay = 1000;
+        if(spawnDelay < 500) {
+            spawnDelay = 500;
         }
 
         //spawn object if spawn delay has passed
@@ -152,14 +162,15 @@ public class SessionData {
     }
 
     private ObjectParameters setEnemyParameters(ObjectParameters p) {
-        int randSubType = mRand.nextInt(2);
+        int randSubType = mRand.nextInt(3);
         switch (randSubType) {
             case 0:
+            case 1:
                 p.setSubType("CAT");
                 setBasicObjectParameters(p, 200, 75, getRandomSpeed(false));
                 setAnimatedImage(p);
                 break;
-            case 1:
+            case 2:
                 p.setSubType("BALL");
                 setBasicObjectParameters(p, 50, 50,getRandomSpeed(true));
                 setAnimatedImage(p);
@@ -202,7 +213,7 @@ public class SessionData {
             speed = 5;
         } else if (speed < 8 && isAlwaysMoving) {
             speed = 8;
-        } else if(speed > 30) {
+        } else if(speed > 35) {
             speed = 30;
         }
         return speed;
@@ -267,9 +278,9 @@ public class SessionData {
         return key;
     }
 
-    private void updateObjects() {
-        //update all objects except player object and background object; sort list according to Y position
-        //(sorting, because we want to draw objects in right order); sort ONLY if there is new object on a sorted list
+    // update all objects except player object and background object; sort list according to Y position
+    // (sorting, because we want to draw objects in right order); sort ONLY if there is new object on a sorted list
+    private void updateObjectsData() {
         if (sObjectWasAdded) {
             sortObjectsByY();
             sObjectWasAdded = false;
@@ -282,10 +293,6 @@ public class SessionData {
     private void sortObjectsByY() {
         Collections.sort(mGameObjects,
                 (object1, object2) -> object1.comparePosition() - object2.comparePosition());
-    }
-
-    private boolean collision(GameObjectContainer object1, GameBaseObject object2) {
-        return Rect.intersects(object1.getRectangle(), object2.getRectangle());
     }
 
     private void updateObjectsPosition() {
@@ -324,6 +331,10 @@ public class SessionData {
         }
     }
 
+    private boolean collision(GameObjectContainer object1, GameBaseObject object2) {
+        return Rect.intersects(object1.getRectangle(), object2.getRectangle());
+    }
+
     private void updateStateOnCollision(String objectType, int bonus, int points) {
         mPlayer.addExtraScore(points);
         mBonusCollected += bonus;
@@ -341,6 +352,14 @@ public class SessionData {
         return mBonusCollected < 0;
     }
 
+    private void updateOnAttackCalled() {
+        if (isAttackCalled) {
+            isAttackCalled = false;
+            destroyEnemies();
+            resetBonus();
+        }
+    }
+
     public void setNewGame() {
         mGameObjects.clear();
         mPlayer.reset();
@@ -348,7 +367,7 @@ public class SessionData {
         mBonusStartTime = 0;
         sObjectWasAdded = false;
         mBonusCollected = 0;
-        mCallback.onObjectCollision(mBonusCollected, "RESET");
+        mCallback.onGameReset();
     }
 
     public boolean isRunning() {
@@ -365,5 +384,22 @@ public class SessionData {
 
     public void movePlayerDown() {
         mPlayer.moveDown();
+    }
+
+    public void destroyEnemies() {
+        for (int i=0; i<mGameObjects.size(); i++) {
+            if (mGameObjects.get(i).getObjectType().equals("ENEMY")) {
+                mGameObjects.remove(i);
+                mPlayer.addExtraScore(mBonusCollected*100);
+            }
+        }
+    }
+
+    public void resetBonus() {
+        mBonusCollected = 0;
+    }
+
+    public void setIsAttackCalled(boolean isCalled) {
+        isAttackCalled = isCalled;
     }
 }

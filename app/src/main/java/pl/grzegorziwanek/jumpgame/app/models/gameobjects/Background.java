@@ -5,10 +5,10 @@ import android.graphics.Canvas;
 
 import pl.grzegorziwanek.jumpgame.app.utilis.Cons;
 
-
 /**
  * Created by Grzegorz Iwanek on 25.08.2016.
- * Contains class responsible for storing information about background mImage, updating them (position), and redrawing them on given canvas
+ * Consists of class responsible for generating background image, updating it's position
+ * and redrawing it on given canvas.
  */
 public class Background {
 
@@ -25,7 +25,7 @@ public class Background {
     }
 
     public void update() {
-        //update position of background
+        //update position of a background
         mX += mDx;
 
         //if mImage is off screen, reset it's position to start position

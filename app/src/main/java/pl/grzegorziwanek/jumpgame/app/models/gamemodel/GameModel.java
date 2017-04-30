@@ -9,10 +9,17 @@ import pl.grzegorziwanek.jumpgame.app.models.gamemodel.sessionmodel.SessionData;
 import pl.grzegorziwanek.jumpgame.app.models.gamemodel.sessionmodel.SessionThread;
 import pl.grzegorziwanek.jumpgame.app.models.gameobjects.Background;
 import pl.grzegorziwanek.jumpgame.app.models.gameobjects.GameObjectContainer;
-import pl.grzegorziwanek.jumpgame.app.models.gameobjects.objects.bonus.Player;
+import pl.grzegorziwanek.jumpgame.app.models.gameobjects.baseobjects.objects.Player;
 import pl.grzegorziwanek.jumpgame.app.viewmodel.CallbackViewModel;
+import pl.grzegorziwanek.jumpgame.app.viewmodel.GameViewModel;
 
+/**
+ * Controller class, responsible for coordination of {@link GamePanel}, {@link SessionData}
+ * and {@link SessionThread}, and game state with {@link GameViewModel}.
+ * Communicates by interface callbacks.
+ */
 public class GameModel {
+
     private CallbackViewModel mCallback;
     private final GamePanel mGamePanel;
     private SessionData mSessionData;
@@ -26,6 +33,7 @@ public class GameModel {
             public void onTouchEventOccurred() {
                 if (!mSessionData.isRunning()) {
                     startGame();
+                    mCallback.onGameStart();
                 }
             }
 
@@ -35,7 +43,8 @@ public class GameModel {
             }
 
             @Override
-            public void onCanvasUnlocked() {
+            public void onAnimationEnded() {
+                mSessionData.destroyEnemies();
             }
         });
 
@@ -49,6 +58,11 @@ public class GameModel {
             @Override
             public void onObjectCollision(int bonusCount, String subtype) {
                 mCallback.onObjectCollision(bonusCount, subtype);
+            }
+
+            @Override
+            public void onGameReset() {
+                mCallback.onGameReset();
             }
 
             @Override
@@ -71,7 +85,6 @@ public class GameModel {
     }
 
     private void startGame() {
-        // TODO: 19.04.2017 remove running from session data
         if (!mSessionThread.isRunning()) {
             mSessionThread.setRunning(true);
             mSessionThread.start();
@@ -85,5 +98,9 @@ public class GameModel {
 
     public void movePlayerDown() {
         mSessionData.movePlayerDown();
+    }
+
+    public void attack() {
+        mSessionData.setIsAttackCalled(true);
     }
 }

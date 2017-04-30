@@ -3,7 +3,15 @@ package pl.grzegorziwanek.jumpgame.app.models.gameobjects;
 import android.graphics.Canvas;
 import android.graphics.Rect;
 
+import pl.grzegorziwanek.jumpgame.app.models.gameobjects.baseobjects.GameBaseObject;
+
+/**
+ * Wrapper class.
+ * Holds one of extensions of {@link GameBaseObject} as a {@link GameObjectService} instance.
+ * Allows injection of different types of game objects and performing collision check by one method.
+ */
 public class GameObjectContainer implements GameObjectService {
+
     private GameObjectService mGameObjectService;
 
     public GameObjectContainer(GameObjectService gameObjectService) {
