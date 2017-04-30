@@ -31,8 +31,8 @@ Game screen ( state 20.04.2017)
 <img src="https://rawgit.com/GregoryIwanek/JumpGame/master/pictures/State_of_game_20.04.2017.png" title="game screen" height="250" />
 
 ## To do
-* add sound effects
+* add sound effects ✓
 * replace java interface callbacs with RxJava
 * add new types of enemies ( random movement pattern)
-* add attack ( under bomb button -> remove all enemies upon use)
-* add new types of bonuses
+* add attack ( under bomb button -> remove all enemies upon use) ✓
+* add new types of bonuses ✓
