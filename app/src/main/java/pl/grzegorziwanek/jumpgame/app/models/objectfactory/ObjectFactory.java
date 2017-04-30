@@ -13,7 +13,7 @@ import pl.grzegorziwanek.jumpgame.app.models.gameobjects.baseobjects.objects.Pla
  */
 public abstract class ObjectFactory {
     /**
-     * Get's fully defined object wrapped by container.
+     * Gets fully defined object wrapped by container.
      * @param parameters container class consists of all parameters required to create {@link GameBaseObject}
      *                   or one of it's children implementing {@link GameObjectService};
      * @return extension object of {@link GameBaseObject} wrapped by container {@link GameObjectContainer};
@@ -23,7 +23,7 @@ public abstract class ObjectFactory {
     }
 
     /**
-     * Get's fully defined object {@link GameObjectService} unwrapped by any container.
+     * Gets fully defined object {@link GameObjectService} unwrapped by any container.
      * @param parameters container class consists of all parameters required to create {@link GameBaseObject}
      *                   or one of it's children implementing {@link GameObjectService};
      * @return returns {@link GameObjectService} object type, without wrapped {@link GameObjectContainer};
