@@ -5,6 +5,7 @@ import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Rect;
+import android.util.Log;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -275,7 +276,6 @@ public class SessionData {
         }
 
         updateObjectsPosition();
-
         checkCollision();
     }
 
@@ -299,53 +299,46 @@ public class SessionData {
 
     private void checkCollision() {
         for (int i=0; i<mGameObjects.size(); i++) {
-            if(collision(mGameObjects.get(i), mPlayer)) {
-                switch (mGameObjects.get(i).getObjectType()) {
-                    case "ENEMY":
-                        if (mGameObjects.get(i).getObjectSubtype().equals("CAT")) {
-                            mGameObjects.remove(i);
-                            mCallback.onEnemyCollision("CAT");
-                            isRunning = false;
-                        } else {
-                            mGameObjects.remove(i);
-                            mCallback.onEnemyCollision("BALL");
-                            isRunning = false;
-                        }
+            if (collision(mGameObjects.get(i), mPlayer)) {
+                switch (mGameObjects.get(i).getObjectSubtype()) {
+                    case "CAT":
+                        mGameObjects.remove(i);
+                        updateStateOnCollision("CAT", -5, -100);
                         break;
-                    case "BONUS":
-                        if (mGameObjects.get(i).getObjectSubtype().equals("CHEESE")) {
-                            mGameObjects.remove(i);
-                            updateBonusValue("CHEESE");
-                            mPlayer.addExtraScore(25);
-                        } else if (mGameObjects.get(i).getObjectSubtype().equals("TRAP")) {
-                            mGameObjects.remove(i);
-                            updateBonusValue("TRAP");
-                            mPlayer.addExtraScore(-50);
-                        }
+                    case "BALL":
+                        mGameObjects.remove(i);
+                        updateStateOnCollision("BALL", -1, -50);
+                        break;
+                    case "CHEESE":
+                        mGameObjects.remove(i);
+                        updateStateOnCollision("CHEESE", 1, 25);
+                        break;
+                    case "TRAP":
+                        mGameObjects.remove(i);
+                        updateStateOnCollision("TRAP", -2, -50);
                         break;
                     default:
-                        System.out.println("ERROR OF OBJECT TYPE OCCUR: UNDEFINED TYPE OF OBJECT COLLIDING WITH PLAYER");
-                        break;
+                        Log.d(getClass().getSimpleName(), " checkCollision error, wrong subtype of colliding object");
                 }
             }
         }
     }
 
-    private void updateBonusValue(String collidingObject) {
-        if (collidingObject.equals("CHEESE")) {
-            if(mBonusCollected <5) {
-                mBonusCollected++;
-            }
-            mCallback.onBonusCollected(mBonusCollected, "CHEESE");
-        } else if (collidingObject.equals("TRAP")) {
-            mBonusCollected -= 2;
-            //if is below zero, set GAME OVER
-            if (mBonusCollected < 0) {
-                isRunning = false;
-                mBonusCollected = 0;
-            }
-            mCallback.onBonusCollected(mBonusCollected, "TRAP");
+    private void updateStateOnCollision(String objectType, int bonus, int points) {
+        mPlayer.addExtraScore(points);
+        mBonusCollected += bonus;
+        if (mBonusCollected > 5) {
+            mBonusCollected = 5;
         }
+        if (isGameOver()) {
+            isRunning = false;
+            mBonusCollected = 0;
+        }
+        mCallback.onObjectCollision(mBonusCollected, objectType);
+    }
+
+    private boolean isGameOver() {
+        return mBonusCollected < 0;
     }
 
     public void setNewGame() {
@@ -355,7 +348,7 @@ public class SessionData {
         mBonusStartTime = 0;
         sObjectWasAdded = false;
         mBonusCollected = 0;
-        mCallback.onBonusCollected(mBonusCollected, "RESET");
+        mCallback.onObjectCollision(mBonusCollected, "RESET");
     }
 
     public boolean isRunning() {

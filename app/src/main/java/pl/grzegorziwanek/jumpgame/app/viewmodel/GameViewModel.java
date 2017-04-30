@@ -45,14 +45,9 @@ public class GameViewModel extends BaseObservable {
     private void setGameModel(Context context, GamePanel gamePanel) {
         mGameModel = new GameModel(context, gamePanel, new CallbackViewModel() {
             @Override
-            public void onEnemyCollision(String subtype) {
-                playSound(subtype);
-            }
-
-            @Override
-            public void onBonusCollected(int bonusCount, String type) {
+            public void onObjectCollision(int bonusCount, String subtype) {
                 mBonusNum.set(bonusCount);
-                playSound(type);
+                playSound(subtype);
                 notifyChange();
             }
 

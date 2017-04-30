@@ -2,9 +2,7 @@ package pl.grzegorziwanek.jumpgame.app.viewmodel;
 
 public interface CallbackViewModel {
 
-    void onEnemyCollision(String subtype);
-
-    void onBonusCollected(int bonusCount, String type);
+    void onObjectCollision(int bonusCount, String subtype);
 
     void onScoreChanged(int score, int bestScore);
 

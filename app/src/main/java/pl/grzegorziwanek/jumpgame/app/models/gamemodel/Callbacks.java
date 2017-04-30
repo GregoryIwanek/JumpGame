@@ -18,9 +18,7 @@ public interface Callbacks {
         void onDataUpdated(Background background, Player player,
                            ArrayList<GameObjectContainer> list);
 
-        void onBonusCollected(int bonusCount, String type);
-
-        void onEnemyCollision(String subtype);
+        void onObjectCollision(int bonusCount, String subtype);
 
         void onScoreChanged(int score, int bestScore);
     }

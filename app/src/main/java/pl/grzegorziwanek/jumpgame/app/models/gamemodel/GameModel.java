@@ -47,13 +47,8 @@ public class GameModel {
             }
 
             @Override
-            public void onBonusCollected(int bonusCount, String type) {
-                mCallback.onBonusCollected(bonusCount, type);
-            }
-
-            @Override
-            public void onEnemyCollision(String subtype) {
-                mCallback.onEnemyCollision(subtype);
+            public void onObjectCollision(int bonusCount, String subtype) {
+                mCallback.onObjectCollision(bonusCount, subtype);
             }
 
             @Override
