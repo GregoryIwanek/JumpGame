@@ -9,15 +9,19 @@ import android.media.AudioAttributes;
 import android.media.AudioManager;
 import android.media.SoundPool;
 import android.os.Build;
+import android.util.Log;
 import android.view.View;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.widget.FrameLayout;
 
+import io.reactivex.disposables.Disposable;
+import io.reactivex.observers.DisposableObserver;
 import pl.grzegorziwanek.jumpgame.app.BR;
 import pl.grzegorziwanek.jumpgame.app.R;
 import pl.grzegorziwanek.jumpgame.app.models.gamemodel.GameModel;
 import pl.grzegorziwanek.jumpgame.app.models.gamemodel.panelmodel.GamePanel;
+import pl.grzegorziwanek.jumpgame.app.utilis.RxCallbackParameters;
 
 public class GameViewModel extends BaseObservable {
 
@@ -34,11 +38,15 @@ public class GameViewModel extends BaseObservable {
     @Bindable private ObservableInt mScore = new ObservableInt(0);
     @Bindable private ObservableInt mBestScore = new ObservableInt(0);
 
+    Disposable observerTest;
+    Disposable modelCallback;
+
     public GameViewModel(Context context, GamePanel gamePanel, FrameLayout cover) {
         mContext = context;
         backgroundCover = cover;
         setSoundPools();
         setGameModel(context, gamePanel);
+        setModelCallback();
         setAnimation();
     }
 
@@ -46,31 +54,74 @@ public class GameViewModel extends BaseObservable {
         mGameModel = new GameModel(context, gamePanel, new CallbackViewModel() {
             @Override
             public void onObjectCollision(int bonusCount, String subtype) {
-                mBonusNum.set(bonusCount);
-                playSound(subtype);
-                notifyChange();
+//                mBonusNum.set(bonusCount);
+//                playSound(subtype);
+//                notifyChange();
             }
 
             @Override
             public void onGameReset() {
-                mBonusNum.set(0);
-                soundPoolBackground.stop(myStreamId);
-                notifyChange();
+//                mBonusNum.set(0);
+//                soundPoolBackground.stop(myStreamId);
+//                notifyChange();
             }
 
             @Override
             public void onScoreChanged(int score, int bestScore) {
-                mScore.set(score);
-                mBestScore.set(bestScore);
-                notifyPropertyChanged(BR.score);
-                notifyPropertyChanged(BR.bestScore);
+//                mScore.set(score);
+//                mBestScore.set(bestScore);
+//                notifyPropertyChanged(BR.score);
+//                notifyPropertyChanged(BR.bestScore);
             }
 
             @Override
             public void onGameStart() {
-                myStreamId = soundPoolBackground.load(mContext, R.raw.pim_pom_music, 1);
+//                myStreamId = soundPoolBackground.load(mContext, R.raw.pim_pom_music, 1);
             }
         });
+
+        setModelCallback();
+    }
+
+    private void setModelCallback() {
+        modelCallback = mGameModel.getCallbackSubjectRx()
+                .subscribeWith(new DisposableObserver<RxCallbackParameters>() {
+                    @Override
+                    public void onNext(RxCallbackParameters p) {
+                        switch (p.getEventType()) {
+                            case SCORE_CHANGED:
+                                mScore.set(p.getScore());
+                                mBestScore.set(p.getBestScore());
+                                notifyPropertyChanged(BR.score);
+                                notifyPropertyChanged(BR.bestScore);
+                                break;
+                            case OBJECT_COLLISION:
+                                mBonusNum.set(p.getBonus());
+                                playSound(p.getCollisionType().toString());
+                                notifyChange();
+                                break;
+                            case GAME_START:
+                                myStreamId = soundPoolBackground.load(mContext, R.raw.pim_pom_music, 1);
+                                break;
+                            case GAME_RESET:
+                                mBonusNum.set(0);
+                                soundPoolBackground.stop(myStreamId);
+                                notifyChange();
+                                break;
+                        }
+                    }
+
+                    @Override
+                    public void onError(Throwable e) {
+                        Log.d(getClass().getSimpleName(), " modelCallbackRx error");
+                        e.printStackTrace();
+                    }
+
+                    @Override
+                    public void onComplete() {
+                        modelCallback.dispose();
+                    }
+                });
     }
 
     private void setSoundPools() {

@@ -1,17 +1,22 @@
 package pl.grzegorziwanek.jumpgame.app.models.gamemodel;
 
 import android.content.Context;
+import android.support.annotation.Nullable;
 
 import java.util.ArrayList;
 
+import io.reactivex.subjects.BehaviorSubject;
 import pl.grzegorziwanek.jumpgame.app.models.gamemodel.panelmodel.GamePanel;
 import pl.grzegorziwanek.jumpgame.app.models.gamemodel.sessionmodel.SessionData;
 import pl.grzegorziwanek.jumpgame.app.models.gamemodel.sessionmodel.SessionThread;
 import pl.grzegorziwanek.jumpgame.app.models.gameobjects.Background;
 import pl.grzegorziwanek.jumpgame.app.models.gameobjects.GameObjectContainer;
 import pl.grzegorziwanek.jumpgame.app.models.gameobjects.baseobjects.objects.Player;
+import pl.grzegorziwanek.jumpgame.app.utilis.RxCallbackParameters;
 import pl.grzegorziwanek.jumpgame.app.viewmodel.CallbackViewModel;
 import pl.grzegorziwanek.jumpgame.app.viewmodel.GameViewModel;
+
+import static pl.grzegorziwanek.jumpgame.app.utilis.RxCallbackParameters.*;
 
 /**
  * Controller class, responsible for coordination of {@link GamePanel}, {@link SessionData}
@@ -24,6 +29,7 @@ public class GameModel {
     private final GamePanel mGamePanel;
     private SessionData mSessionData;
     private SessionThread mSessionThread;
+    private BehaviorSubject<RxCallbackParameters> mCallbackParametersRx;
 
     public GameModel(Context context, GamePanel gamePanel, CallbackViewModel callback) {
         mCallback = callback;
@@ -58,6 +64,8 @@ public class GameModel {
             @Override
             public void onObjectCollision(int bonusCount, String subtype) {
                 mCallback.onObjectCollision(bonusCount, subtype);
+                mCallbackParametersRx.onNext(setCallbackParams(EventType.OBJECT_COLLISION,
+                        CollisionType.TRAP, 100, 100, bonusCount));
             }
 
             @Override
@@ -84,6 +92,12 @@ public class GameModel {
         });
     }
 
+    private RxCallbackParameters setCallbackParams(EventType event, CollisionType type,
+                                                   @Nullable int score, @Nullable int bestScore,
+                                                   @Nullable int bonus) {
+        return new RxCallbackParameters(event, type, score, bestScore, bonus);
+    }
+
     private void startGame() {
         if (!mSessionThread.isRunning()) {
             mSessionThread.setRunning(true);
@@ -102,5 +116,10 @@ public class GameModel {
 
     public void attack() {
         mSessionData.setIsAttackCalled(true);
+    }
+
+    public BehaviorSubject<RxCallbackParameters> getCallbackSubjectRx() {
+        mCallbackParametersRx = BehaviorSubject.create();
+        return mCallbackParametersRx;
     }
 }
