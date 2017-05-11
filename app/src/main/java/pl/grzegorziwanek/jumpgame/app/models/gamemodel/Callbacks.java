@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import pl.grzegorziwanek.jumpgame.app.models.gameobjects.Background;
 import pl.grzegorziwanek.jumpgame.app.models.gameobjects.GameObjectContainer;
 import pl.grzegorziwanek.jumpgame.app.models.gameobjects.baseobjects.objects.Player;
+import pl.grzegorziwanek.jumpgame.app.utilis.RxCallbackParam.CollisionType;
 
 /**
  * Callbacks interface. Used as way of communication in {@link GameModel}
@@ -22,7 +23,7 @@ public interface Callbacks {
 
         void onDataUpdated(Background background, Player player, ArrayList<GameObjectContainer> list);
 
-        void onObjectCollision(int bonusCount, String subtype);
+        void onObjectCollision(int bonusCount, CollisionType type);
 
         void onGameReset();
 

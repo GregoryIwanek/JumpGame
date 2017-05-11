@@ -1,7 +1,6 @@
 package pl.grzegorziwanek.jumpgame.app.models.gamemodel;
 
 import android.content.Context;
-import android.support.annotation.Nullable;
 
 import java.util.ArrayList;
 
@@ -12,11 +11,11 @@ import pl.grzegorziwanek.jumpgame.app.models.gamemodel.sessionmodel.SessionThrea
 import pl.grzegorziwanek.jumpgame.app.models.gameobjects.Background;
 import pl.grzegorziwanek.jumpgame.app.models.gameobjects.GameObjectContainer;
 import pl.grzegorziwanek.jumpgame.app.models.gameobjects.baseobjects.objects.Player;
-import pl.grzegorziwanek.jumpgame.app.utilis.RxCallbackParameters;
-import pl.grzegorziwanek.jumpgame.app.viewmodel.CallbackViewModel;
+import pl.grzegorziwanek.jumpgame.app.utilis.RxCallbackParam;
 import pl.grzegorziwanek.jumpgame.app.viewmodel.GameViewModel;
 
-import static pl.grzegorziwanek.jumpgame.app.utilis.RxCallbackParameters.*;
+import static pl.grzegorziwanek.jumpgame.app.utilis.RxCallbackParam.CollisionType;
+import static pl.grzegorziwanek.jumpgame.app.utilis.RxCallbackParam.EventType;
 
 /**
  * Controller class, responsible for coordination of {@link GamePanel}, {@link SessionData}
@@ -25,21 +24,20 @@ import static pl.grzegorziwanek.jumpgame.app.utilis.RxCallbackParameters.*;
  */
 public class GameModel {
 
-    private CallbackViewModel mCallback;
     private final GamePanel mGamePanel;
     private SessionData mSessionData;
     private SessionThread mSessionThread;
-    private BehaviorSubject<RxCallbackParameters> mCallbackParametersRx;
+    private BehaviorSubject<RxCallbackParam> mCallbackRx;
 
-    public GameModel(Context context, GamePanel gamePanel, CallbackViewModel callback) {
-        mCallback = callback;
+    public GameModel(Context context, GamePanel gamePanel) {
         mGamePanel = gamePanel;
+        mCallbackRx = BehaviorSubject.create();
         mGamePanel.setCallback(new Callbacks.PanelCallback() {
             @Override
             public void onTouchEventOccurred() {
                 if (!mSessionData.isRunning()) {
                     startGame();
-                    mCallback.onGameStart();
+                    mCallbackRx.onNext(new RxCallbackParam(EventType.GAME_START));
                 }
             }
 
@@ -62,20 +60,18 @@ public class GameModel {
             }
 
             @Override
-            public void onObjectCollision(int bonusCount, String subtype) {
-                mCallback.onObjectCollision(bonusCount, subtype);
-                mCallbackParametersRx.onNext(setCallbackParams(EventType.OBJECT_COLLISION,
-                        CollisionType.TRAP, 100, 100, bonusCount));
+            public void onObjectCollision(int bonusCount, CollisionType type) {
+                mCallbackRx.onNext(new RxCallbackParam(EventType.OBJECT_COLLISION, type, bonusCount));
             }
 
             @Override
             public void onGameReset() {
-                mCallback.onGameReset();
+                mCallbackRx.onNext(new RxCallbackParam(EventType.GAME_RESET));
             }
 
             @Override
             public void onScoreChanged(int score, int bestScore) {
-                mCallback.onScoreChanged(score, bestScore);
+                mCallbackRx.onNext(new RxCallbackParam(EventType.SCORE_CHANGED, score, bestScore));
             }
         });
 
@@ -90,12 +86,6 @@ public class GameModel {
                 mGamePanel.unlockCanvas();
             }
         });
-    }
-
-    private RxCallbackParameters setCallbackParams(EventType event, CollisionType type,
-                                                   @Nullable int score, @Nullable int bestScore,
-                                                   @Nullable int bonus) {
-        return new RxCallbackParameters(event, type, score, bestScore, bonus);
     }
 
     private void startGame() {
@@ -118,8 +108,7 @@ public class GameModel {
         mSessionData.setIsAttackCalled(true);
     }
 
-    public BehaviorSubject<RxCallbackParameters> getCallbackSubjectRx() {
-        mCallbackParametersRx = BehaviorSubject.create();
-        return mCallbackParametersRx;
+    public BehaviorSubject<RxCallbackParam> getCallbackSubjectRx() {
+        return mCallbackRx;
     }
 }

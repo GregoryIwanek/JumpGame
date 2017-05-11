@@ -17,8 +17,24 @@ public class ObjectParameters {
     private int numFrames;
     private int framesInterval;
 
+    /**
+     * Constructor used with objects without known parameters;
+     * Parameters are defined during a roll process through setters;
+     */
     public ObjectParameters() {}
 
+    /**
+     * Constructor used for objects with known parameters;
+     * @param x position on X axis;
+     * @param y position on Y axis;
+     * @param width width of the object;
+     * @param height height of the object;
+     * @param speed speed on X axis;
+     * @param type main category of object;
+     * @param subType subcategory of main category;
+     * @param imageRes image resource of the object;
+     * @param numFrames in case it's animated object, number of frames to show in animation;
+     */
     public ObjectParameters(int x, int y, int width, int height, int speed,
                             String type, String subType, Bitmap imageRes, int numFrames) {
         this.x = x;

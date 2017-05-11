@@ -21,14 +21,15 @@ import pl.grzegorziwanek.jumpgame.app.BR;
 import pl.grzegorziwanek.jumpgame.app.R;
 import pl.grzegorziwanek.jumpgame.app.models.gamemodel.GameModel;
 import pl.grzegorziwanek.jumpgame.app.models.gamemodel.panelmodel.GamePanel;
-import pl.grzegorziwanek.jumpgame.app.utilis.RxCallbackParameters;
+import pl.grzegorziwanek.jumpgame.app.utilis.RxCallbackParam;
+import pl.grzegorziwanek.jumpgame.app.utilis.RxCallbackParam.CollisionType;
 
 public class GameViewModel extends BaseObservable {
 
     private SoundPool soundPoolCollision;
     private SoundPool soundPoolBackground;
-    private SoundPool soundPoolExplossion;
-    int myStreamId;
+    private SoundPool soundPoolExplosion;
+    private int myStreamId;
     private AudioAttributes attributes;
     private Animation animation;
     private FrameLayout backgroundCover;
@@ -38,75 +39,38 @@ public class GameViewModel extends BaseObservable {
     @Bindable private ObservableInt mScore = new ObservableInt(0);
     @Bindable private ObservableInt mBestScore = new ObservableInt(0);
 
-    Disposable observerTest;
-    Disposable modelCallback;
+    private Disposable modelCallback;
 
     public GameViewModel(Context context, GamePanel gamePanel, FrameLayout cover) {
         mContext = context;
         backgroundCover = cover;
         setSoundPools();
         setGameModel(context, gamePanel);
-        setModelCallback();
+        setModelCallbackRx();
         setAnimation();
     }
 
     private void setGameModel(Context context, GamePanel gamePanel) {
-        mGameModel = new GameModel(context, gamePanel, new CallbackViewModel() {
-            @Override
-            public void onObjectCollision(int bonusCount, String subtype) {
-//                mBonusNum.set(bonusCount);
-//                playSound(subtype);
-//                notifyChange();
-            }
-
-            @Override
-            public void onGameReset() {
-//                mBonusNum.set(0);
-//                soundPoolBackground.stop(myStreamId);
-//                notifyChange();
-            }
-
-            @Override
-            public void onScoreChanged(int score, int bestScore) {
-//                mScore.set(score);
-//                mBestScore.set(bestScore);
-//                notifyPropertyChanged(BR.score);
-//                notifyPropertyChanged(BR.bestScore);
-            }
-
-            @Override
-            public void onGameStart() {
-//                myStreamId = soundPoolBackground.load(mContext, R.raw.pim_pom_music, 1);
-            }
-        });
-
-        setModelCallback();
+        mGameModel = new GameModel(context, gamePanel);
     }
 
-    private void setModelCallback() {
+    private void setModelCallbackRx() {
         modelCallback = mGameModel.getCallbackSubjectRx()
-                .subscribeWith(new DisposableObserver<RxCallbackParameters>() {
+                .subscribeWith(new DisposableObserver<RxCallbackParam>() {
                     @Override
-                    public void onNext(RxCallbackParameters p) {
+                    public void onNext(RxCallbackParam p) {
                         switch (p.getEventType()) {
                             case SCORE_CHANGED:
-                                mScore.set(p.getScore());
-                                mBestScore.set(p.getBestScore());
-                                notifyPropertyChanged(BR.score);
-                                notifyPropertyChanged(BR.bestScore);
+                                onScoreChangedEvent(p);
                                 break;
                             case OBJECT_COLLISION:
-                                mBonusNum.set(p.getBonus());
-                                playSound(p.getCollisionType().toString());
-                                notifyChange();
+                                onObjectCollisionEvent(p);
                                 break;
                             case GAME_START:
-                                myStreamId = soundPoolBackground.load(mContext, R.raw.pim_pom_music, 1);
+                                onGameStartEvent();
                                 break;
                             case GAME_RESET:
-                                mBonusNum.set(0);
-                                soundPoolBackground.stop(myStreamId);
-                                notifyChange();
+                                onGameResetEvent();
                                 break;
                         }
                     }
@@ -128,8 +92,9 @@ public class GameViewModel extends BaseObservable {
         // AudioAttributes.Builder() requires API >=  21
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             attributes = new AudioAttributes.Builder()
-                    .setUsage(AudioAttributes.USAGE_GAME)
                     .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
+                    .setFlags(AudioAttributes.FLAG_AUDIBILITY_ENFORCED)
+                    .setUsage(AudioAttributes.USAGE_GAME)
                     .build();
             soundPoolBackground = new SoundPool.Builder().
                     setAudioAttributes(attributes)
@@ -137,13 +102,13 @@ public class GameViewModel extends BaseObservable {
             soundPoolCollision = new SoundPool.Builder().
                     setAudioAttributes(attributes)
                     .build();
-            soundPoolExplossion = new SoundPool.Builder().
+            soundPoolExplosion = new SoundPool.Builder().
                     setAudioAttributes(attributes)
                     .build();
         } else {
             soundPoolBackground = new SoundPool(1, AudioManager.STREAM_MUSIC, 0);
             soundPoolCollision = new SoundPool(5, AudioManager.STREAM_MUSIC, 0);
-            soundPoolExplossion = new SoundPool(1, AudioManager.STREAM_MUSIC, 0);
+            soundPoolExplosion = new SoundPool(1, AudioManager.STREAM_MUSIC, 0);
         }
 
         // set listeners
@@ -153,22 +118,45 @@ public class GameViewModel extends BaseObservable {
         soundPoolCollision.setOnLoadCompleteListener(
                 (soundPool, sampleId, status) -> soundPool.play(sampleId, 0.5f, 0.5f, 1, 0, 1f)
         );
-        soundPoolExplossion.setOnLoadCompleteListener((
+        soundPoolExplosion.setOnLoadCompleteListener((
                 soundPool, sampleId, status) -> soundPool.play(sampleId, 0.5f, 0.5f, 1, 0, 1f));
     }
 
-    private void playSound(String type) {
+    private void onScoreChangedEvent(RxCallbackParam p) {
+        mScore.set(p.getScore());
+        mBestScore.set(p.getBestScore());
+        notifyPropertyChanged(BR.score);
+        notifyPropertyChanged(BR.bestScore);
+    }
+
+    private void onGameStartEvent() {
+        myStreamId = soundPoolBackground.load(mContext, R.raw.pim_pom_music, 1);
+    }
+
+    private void onGameResetEvent() {
+        mBonusNum.set(0);
+        soundPoolBackground.stop(myStreamId);
+        notifyChange();
+    }
+
+    private void onObjectCollisionEvent(RxCallbackParam p) {
+        mBonusNum.set(p.getBonusCount());
+        playSound(p.getCollisionType());
+        notifyChange();
+    }
+
+    private void playSound(CollisionType type) {
         switch (type) {
-            case "CHEESE":
+            case CHEESE:
                 soundPoolCollision.load(mContext, R.raw.point_collected, 1);
                 break;
-            case "TRAP":
+            case TRAP:
                 soundPoolCollision.load(mContext, R.raw.mouse_trap_sound, 1);
                 break;
-            case "CAT":
+            case CAT:
                 soundPoolCollision.load(mContext, R.raw.cat_angry, 1);
                 break;
-            case "BALL":
+            case BALL:
                 soundPoolCollision.load(mContext, R.raw.ball_collision, 1);
                 break;
         }
@@ -192,7 +180,7 @@ public class GameViewModel extends BaseObservable {
 
     public void onButtonAttackClick(View view) {
         if (mBonusNum.get() >= 2) {
-            soundPoolExplossion.load(mContext, R.raw.explosion, 1);
+            soundPoolExplosion.load(mContext, R.raw.explosion, 1);
             backgroundCover.setBackgroundColor(Color.BLACK);
             backgroundCover.startAnimation(animation);
             mBonusNum.set(0);

@@ -20,6 +20,7 @@ import pl.grzegorziwanek.jumpgame.app.models.gameobjects.baseobjects.objects.Pla
 import pl.grzegorziwanek.jumpgame.app.models.objectfactory.ObjectFactory;
 import pl.grzegorziwanek.jumpgame.app.utilis.Cons;
 import pl.grzegorziwanek.jumpgame.app.utilis.ObjectParameters;
+import pl.grzegorziwanek.jumpgame.app.utilis.RxCallbackParam;
 
 /**
  * Session data model class. Consists of essential data and methods responsible for control
@@ -345,7 +346,24 @@ public class SessionData {
             isRunning = false;
             mBonusCollected = 0;
         }
-        mCallback.onObjectCollision(mBonusCollected, objectType);
+        //mCallback.aaa(mBonusCollected, objectType);
+
+        RxCallbackParam.CollisionType a;
+        switch (objectType) {
+            case "TRAP":
+                a = RxCallbackParam.CollisionType.TRAP;
+                break;
+            case "CHEESE":
+                a = RxCallbackParam.CollisionType.CHEESE;
+                break;
+            case "CAT":
+                a = RxCallbackParam.CollisionType.CAT;
+                break;
+            default:
+                a = RxCallbackParam.CollisionType.BALL;
+                break;
+        }
+        mCallback.onObjectCollision(mBonusCollected, a);
     }
 
     private boolean isGameOver() {
